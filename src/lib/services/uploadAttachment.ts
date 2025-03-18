@@ -1,16 +1,16 @@
 
-import type { UploadResumeApiResponse } from '$lib/types/uploadResume';
+import type { AttachmentUploadApiResponse } from '$lib/types/uploadAttachments';
 
 
 
 
-export async function uploadResume(resume: File) {
+export async function uploadAttachments(file: File) {
 
     const formData = new FormData();
-    formData.append('file', resume);
+    formData.append('file', file);
 
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/upload_resume`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
             method: 'POST',
             body: formData,
         });
@@ -20,7 +20,7 @@ export async function uploadResume(resume: File) {
             throw new Error(error.detail || 'Resume upload failed');
         }
 
-        const data: UploadResumeApiResponse = await response.json();
+        const data: AttachmentUploadApiResponse = await response.json();
         return data;
 
     } catch (error) {

@@ -1,14 +1,10 @@
 <script lang="ts">
   import Login from "$lib/components/login/Login.svelte";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
 
-    const handleLogin = async () => {
-        await goto(`/dasboard`);
-    };
-
-
+  const handleLogin = async () => {
+    await goto(`/dashboard`);
+  };
 </script>
-
-
 
 <Login navigate={handleLogin} />

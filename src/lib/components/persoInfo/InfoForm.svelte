@@ -1,23 +1,21 @@
 <script lang="ts">
-import type { UploadResumeApiResponse } from "$lib/types/uploadResume";
-import type { Writable } from 'svelte/store';
+  import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
+  import type { Writable } from "svelte/store";
 
-
-let { cvData } = $props<{ cvData: UploadResumeApiResponse | null }>();
-
-
-    
+  let { cvData } = $props<{ cvData: SubmitResumeApiRequest | null }>();
 
   // Initialize default values if $cvData is null
-  let data = $derived(cvData?.cv_data || {
-    first_name: "",
-    last_name: "",
-    job_title: "",
-    years_of_experience: 0,
-    phone_number: "",
-    address: { country: "", street: "" },
-    email: "",
-  });
+  let data = $derived(
+    cvData?.cv_data || {
+      first_name: "",
+      last_name: "",
+      job_title: "",
+      years_of_experience: 0,
+      phone_number: "",
+      address: { country: "", street: "" },
+      email: "",
+    },
+  );
 </script>
 
 <h2 class="mb-6 text-center text-xl font-bold text-red-600">
