@@ -2,34 +2,31 @@ import type { LoginRequest, LoginResponse } from "$lib/types/login";
 
 export async function loginUser(userData: LoginRequest): Promise<LoginResponse> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/candidates/login`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(userData)
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
-            return {
-                success: false,
-                error: data.detail || 'Login failed'
-            };
+            throw new Error(data.error);
         }
-        
+
         return {
-            success: true,
-            data: {
-                access_token: data.access_token,
-                refresh_token: data.refresh_token
-            }
+
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+            account_type: data.account_type
         };
     } catch (error) {
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : 'Login failed'
-        };
+        if (error instanceof Error) {
+            throw new Error(error.message);
+        } else {
+            throw new Error('An unexpected error occurred');
+        }
     }
 }

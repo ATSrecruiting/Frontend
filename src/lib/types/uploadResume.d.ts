@@ -1,4 +1,5 @@
 export interface UploadResumeApiResponse {
+  file_id: string;
   filename: string;
   content_type: string;
   file_path: string;

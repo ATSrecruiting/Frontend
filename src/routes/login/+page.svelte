@@ -7,4 +7,4 @@
   };
 </script>
 
-<Login navigate={handleLogin} />
+<Login />

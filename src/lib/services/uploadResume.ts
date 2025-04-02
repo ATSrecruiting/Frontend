@@ -4,7 +4,7 @@ import type { UploadResumeApiResponse } from '$lib/types/uploadResume';
 
 
 
-export async function uploadResume(resume: File) {
+export async function uploadResume(resume: File): Promise<UploadResumeApiResponse> {
 
     const formData = new FormData();
     formData.append('file', resume);

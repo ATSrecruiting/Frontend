@@ -1,8 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { ListCandidate, CandidateStatus } from "$lib/types/candidates";
-    import { listCandidates } from "$lib/services/candidates";
+    import {
+        listCandidates,
+        listCandidatesWithSimilaritySearch,
+    } from "$lib/services/candidates";
     import { goto } from "$app/navigation";
+    import { CreateTempSession } from "$lib/services/chat";
 
     // State for pagination and loading
     let currentPage = $state(1);
@@ -11,21 +15,38 @@
     let isLoading = $state(false);
     let error = $state<string | null>(null);
 
+    // Search functionality
+    let searchQuery = $state("");
+    let isSearching = $state(false);
+
     // Initialize candidates data array
     let candidatesData = $state<ListCandidate[]>([]);
 
     // Load candidates from API
-    async function loadCandidates() {
+    async function loadCandidates(isSearchRequest = false) {
         isLoading = true;
+        isSearching = isSearchRequest;
         error = null;
         try {
-            const data = await listCandidates(pageSize, currentPage);
-            console.log("Loaded candidates:", data);
+            // For normal pagination requests
+            let data;
+            if (!isSearchRequest) {
+                data = await listCandidates(pageSize, currentPage);
+            } else {
+                // You will replace this with your similarity search API call
+                // For example: data = await searchCandidates(searchQuery, pageSize, currentPage);
+                data = await listCandidatesWithSimilaritySearch(
+                    pageSize,
+                    currentPage,
+                    searchQuery,
+                ); // Temporary placeholder
+                console.log("Searching with query:", searchQuery);
+            }
+
             // Important: Ensure data is an array before proceeding
             if (Array.isArray(data)) {
                 // Create a new array instead of mutating the existing one
                 candidatesData = [...data];
-                console.log("Loaded candidates:", candidatesData.length);
 
                 // Set total count (in a real app, API would return this)
                 totalCandidates =
@@ -35,8 +56,6 @@
                               totalCandidates,
                           )
                         : totalCandidates;
-
-                console.log("Loaded candidates:", candidatesData.length);
             } else {
                 throw new Error("Invalid data format received from API");
             }
@@ -48,7 +67,22 @@
             console.error("Error fetching candidates:", err);
         } finally {
             isLoading = false;
+            isSearching = false;
         }
+    }
+
+    // Handle search submission
+    function handleSearch(e: Event) {
+        e.preventDefault();
+        currentPage = 1;
+        loadCandidates(true); // Pass true to indicate this is a search request
+    }
+
+    // Clear search and reset to regular listing
+    function clearSearch() {
+        searchQuery = "";
+        currentPage = 1;
+        loadCandidates();
     }
 
     // Load data on component mount
@@ -60,13 +94,13 @@
     function handlePreviousPage() {
         if (currentPage > 1) {
             currentPage--;
-            loadCandidates();
+            loadCandidates(searchQuery !== "");
         }
     }
 
     function handleNextPage() {
         currentPage++;
-        loadCandidates();
+        loadCandidates(searchQuery !== "");
     }
 
     // Status color mapping
@@ -88,6 +122,30 @@
                 return "bg-red-100 text-red-800";
             default:
                 return "bg-gray-100 text-gray-800";
+        }
+    }
+
+    // Handle starting a chat with current candidates
+    async function startChat() {
+        try {
+            // Get candidate IDs
+            const candidateIds = candidatesData.map(
+                (candidate) => candidate.id,
+            );
+
+            // Create temporary session and get session ID
+            const response = await CreateTempSession(candidateIds);
+            const sessionId = response.session_id; // Assuming the response has a session_id field
+
+            // Create URL with session ID as parameter
+            const queryParams = new URLSearchParams();
+            queryParams.append("session_id", sessionId);
+
+            // Navigate to chat page with session ID
+            goto(`/dashboard/chat?${queryParams.toString()}`);
+        } catch (error) {
+            console.error("Error starting chat session:", error);
+            // Handle error appropriately
         }
     }
 
@@ -131,7 +189,7 @@
 <div
     class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
 >
-    <!-- Table Header - Simplified without filters -->
+    <!-- Table Header with Search - Simplified without filters -->
     <div class="p-4 border-b border-gray-200 bg-gray-50 space-y-4">
         <div
             class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
@@ -140,6 +198,7 @@
 
             <button
                 class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+                onclick={startChat}
             >
                 <svg
                     class="w-4 h-4"
@@ -152,17 +211,96 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                     ></path>
                 </svg>
-                Add Candidate
+                Start a Chat
             </button>
         </div>
 
+        <!-- Search bar -->
+        <form onsubmit={handleSearch} class="flex flex-col sm:flex-row gap-2">
+            <div class="flex-grow relative">
+                <div
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                >
+                    <svg
+                        class="h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </div>
+                <input
+                    type="text"
+                    bind:value={searchQuery}
+                    placeholder="Search candidates..."
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+            </div>
+            <div class="flex gap-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    disabled={isSearching}
+                >
+                    {#if isSearching}
+                        <svg
+                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        Searching...
+                    {:else}
+                        Search
+                    {/if}
+                </button>
+                {#if searchQuery}
+                    <button
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        onclick={clearSearch}
+                    >
+                        Clear
+                    </button>
+                {/if}
+            </div>
+        </form>
+
         <div class="flex justify-between items-center">
             <div class="text-sm text-gray-500">
-                Showing <span class="font-medium">{candidatesData.length}</span>
-                candidates
+                {#if searchQuery}
+                    <span class="font-medium">Search results:</span> Showing
+                    <span class="font-medium">{candidatesData.length}</span>
+                    candidates for "{searchQuery}"
+                {:else}
+                    Showing <span class="font-medium"
+                        >{candidatesData.length}</span
+                    >
+                    candidates
+                {/if}
             </div>
         </div>
     </div>
@@ -205,7 +343,7 @@
             </div>
             <button
                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                onclick={() => loadCandidates()}
+                onclick={() => loadCandidates(searchQuery !== "")}
             >
                 Try Again
             </button>
@@ -387,35 +525,6 @@
                             </td>
                         </tr>
                     {/each}
-
-                    {#if candidatesData.length === 0}
-                        <tr>
-                            <td
-                                colspan="6"
-                                class="px-6 py-10 text-center text-gray-500"
-                            >
-                                <div class="flex flex-col items-center">
-                                    <svg
-                                        class="w-12 h-12 mb-4 text-gray-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        ></path>
-                                    </svg>
-                                    <p class="text-lg font-medium">
-                                        No candidates found
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
-                    {/if}
                 </tbody>
             </table>
         </div>
@@ -425,31 +534,10 @@
     {#if !isLoading && !error && candidatesData.length === 0}
         <div class="p-12 flex justify-center items-center">
             <div class="text-center">
-                <svg
-                    class="w-16 h-16 text-gray-400 mx-auto mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                    ></path>
-                </svg>
-                <p class="text-xl font-medium text-gray-700 mb-2">
-                    No candidates yet
-                </p>
-                <p class="text-gray-500 mb-6">
-                    Add your first candidate to get started
-                </p>
-                <button
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors mx-auto"
-                >
+                {#if searchQuery}
+                    <!-- No search results -->
                     <svg
-                        class="w-4 h-4"
+                        class="w-16 h-16 text-gray-400 mx-auto mb-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -459,11 +547,63 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                         ></path>
                     </svg>
-                    Add Candidate
-                </button>
+                    <p class="text-xl font-medium text-gray-700 mb-2">
+                        No results found
+                    </p>
+                    <p class="text-gray-500 mb-6">
+                        Try adjusting your search query
+                    </p>
+                    <button
+                        class="text-blue-600 hover:text-blue-800 font-medium"
+                        onclick={clearSearch}
+                    >
+                        Clear search
+                    </button>
+                {:else}
+                    <!-- No candidates at all -->
+                    <svg
+                        class="w-16 h-16 text-gray-400 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        ></path>
+                    </svg>
+                    <p class="text-xl font-medium text-gray-700 mb-2">
+                        No candidates yet
+                    </p>
+                    <p class="text-gray-500 mb-6">
+                        Add your first candidate to get started
+                    </p>
+                    <button
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors mx-auto"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            ></path>
+                        </svg>
+                        Add Candidate
+                    </button>
+                {/if}
             </div>
         </div>
     {/if}

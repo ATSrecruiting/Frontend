@@ -1,4 +1,5 @@
 export interface SubmitResumeApiRequest {
+    file_id: string;
     filename: string;
     content_type: string;
     file_path: string;
@@ -6,6 +7,7 @@ export interface SubmitResumeApiRequest {
 }
 
 export interface CVDataRequest {
+    file_id: string;
     first_name: string;
     last_name: string;
     email: string;

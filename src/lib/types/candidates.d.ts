@@ -23,21 +23,39 @@ export interface ListCandidate {
     tags?: string[];
 };
 
+export interface ListCandidateById {
+    id: number;
+    first_name: string;
+    last_name: string;
+    job_title: string;
+    years_of_experience: number;
+}
+
+
+
 export interface Attachments {
     file_path: string;
     filename: string;
 }
 
-
+export interface VerificationDetailResponse {
+    recruiter_id: number;
+    verified_at: string; // ISO date string from backend
+    recruiter_name: string | null;
+}
 
 export interface WorkExperienceView {
+    id: string; // Assuming ID is string (UUID)
     title: string | null;
     company: string | null;
     start_date: string | null;
     end_date: string | null;
     location: string | null;
-    attachments: Attachments[];
+    attachments: Attachments[]; // Keep existing attachments structure
+    // Replace is_verified and verified_by with the new verifications array
+    verifications: VerificationDetailResponse[];
 }
+
 
 
 interface Address {
@@ -54,4 +72,11 @@ export interface CandidatePersonalInfo {
     address: Address;
     years_of_experience: number;
 
+}
+
+
+export interface VerifyWorkExperienceResponse {
+    work_experience_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
 }

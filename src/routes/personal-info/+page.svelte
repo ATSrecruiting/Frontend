@@ -14,10 +14,12 @@
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
 
   let data = $state<SubmitResumeApiRequest>({
+    file_id: $cvData?.file_id ?? "",
     filename: $cvData?.filename ?? "",
     content_type: $cvData?.content_type ?? "",
     file_path: $cvData?.file_path ?? "",
     cv_data: {
+      file_id: $cvData?.file_id ?? "",
       first_name: $cvData?.cv_data.first_name ?? "",
       last_name: $cvData?.cv_data.last_name ?? "",
       email: $cvData?.cv_data.email ?? "",

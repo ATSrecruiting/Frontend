@@ -1,12 +1,9 @@
 export interface LoginRequest {
-    username: string;
+    email: string;
     password: string;
 }
 export interface LoginResponse {
-    success: boolean;
-    error?: string;
-    data?: {
-        access_token: string;
-        refresh_token: string;
-    };
+    access_token: string;
+    refresh_token: string;
+    account_type: string;
 }
