@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -165,6 +165,41 @@ export async function verifyWorkExperience(
     const headers = await authService.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verify`,
+        {
+            method: "PUT",
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return verifyWorkExperience(candidateId, workExperienceId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Handle potential conflict (e.g., 409 if already verified by this user, though backend might just return success)
+        // Handle other errors
+        const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+        console.error(`API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json(); // Return data matching VerifyWorkExperienceResponse
+}
+
+
+
+export async function unverifyWorkExperience(
+    candidateId: string,
+    workExperienceId: string,
+): Promise<UnVerifyWorkExperienceResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/unverify`,
         {
             method: "PUT",
             headers,

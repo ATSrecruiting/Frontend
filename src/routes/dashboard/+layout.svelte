@@ -3,12 +3,19 @@
   import Header from "$lib/components/claudeHeader/Header.svelte";
   import { getLoggedUser } from "$lib/services/user";
   import type { UserProfile } from "$lib/types/user";
+  import {userStore} from "$lib/stores/userStore";
 
   let user = $state<UserProfile>();
 
   async function getUserprofile() {
     try {
       user = await getLoggedUser();
+      if (user){
+        userStore.set(user);
+      } else {
+        console.error("User not found");
+        // Handle user not found state if necessary
+      }
     } catch (error) {
       console.error("Failed to fetch user:", error);
       // Handle error state if necessary

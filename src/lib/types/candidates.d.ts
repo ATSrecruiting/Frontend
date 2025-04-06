@@ -80,3 +80,9 @@ export interface VerifyWorkExperienceResponse {
     recruiter_id: number; // ID of the recruiter who performed the verification
     message: string; // Confirmation message from backend
 }
+
+export interface UnVerifyWorkExperienceResponse {
+    work_experience_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}

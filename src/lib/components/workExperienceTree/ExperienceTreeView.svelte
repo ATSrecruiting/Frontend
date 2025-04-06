@@ -1,36 +1,37 @@
+
 <script lang="ts">
     import {
         ChevronDown,
         ChevronRight,
         Paperclip,
         CheckCircle,
-        // XCircle, // Keep if needed for other UI parts, or remove if only used for 'Not Verified' text
         Shield,
         Loader,
-        Users, // Icon for multiple users
-        Info, // Icon for tooltip/dropdown trigger
+        Users,
+        Info,
+        X, // Added X icon for unverify
     } from "lucide-svelte";
     import { onMount } from "svelte";
     import type {
         WorkExperienceView,
         VerifyWorkExperienceResponse,
-        VerificationDetailResponse, // Import the detail response type
-        // Attachments, // Import if needed directly
+        VerificationDetailResponse,
     } from "$lib/types/candidates";
     import {
         getCandidateWorkExperience,
         verifyWorkExperience,
+        unverifyWorkExperience,
     } from "$lib/services/candidates";
     import Carousel from "$lib/components/carousel/Carousel.svelte";
-    // import Tooltip from "$lib/components/Tooltip.svelte"; // Assuming you have a Tooltip component
+    import {userStore} from "$lib/stores/userStore";
 
     // Props
     let { candidateId } = $props<string>();
 
     // Component State
     let isExpanded = $state(true);
-    let work_exp = $state<WorkExperienceView[] | undefined>(undefined); // Initial state undefined
-    let isLoading = $state(true); // Add loading state for initial fetch
+    let work_exp = $state<WorkExperienceView[] | undefined>(undefined);
+    let isLoading = $state(true);
     let fetchError = $state<string | null>(null);
 
     // Modal State
@@ -40,9 +41,9 @@
     // Verification Modal State
     let verificationModal = $state(false);
     let experienceToVerify = $state<WorkExperienceView | null>(null);
-    // let verificationNote = $state(""); // Removed, not used in API call
     let verificationLoading = $state(false);
     let verificationError = $state("");
+    let isUnverifying = $state(false); // New state to track if we're verifying or unverifying
 
     // State to manage visibility of verifier lists (using experience ID as key)
     let visibleVerifiers = $state<Record<string, boolean>>({});
@@ -58,15 +59,14 @@
         fetchError = null;
         try {
             const data = await getCandidateWorkExperience(id);
-            // Sort experiences (optional, e.g., by start date) before assigning
-            work_exp = data; // Assign fetched data
+            work_exp = data;
         } catch (error) {
             console.error("Failed to load work experience:", error);
             fetchError =
                 error instanceof Error
                     ? error.message
                     : "An unknown error occurred while fetching work experience.";
-            work_exp = []; // Set to empty array on error to avoid {#each} issues
+            work_exp = [];
         } finally {
             isLoading = false;
         }
@@ -97,50 +97,70 @@
         return work_exp.find((exp) => exp.id === currentExpId) ?? null;
     }
 
-    function openVerificationModal(experience: WorkExperienceView) {
+    // Check if the current user has already verified this experience
+    function isVerifiedByCurrentUser(workExp: WorkExperienceView): boolean {
+        if (!workExp.verifications || workExp.verifications.length === 0) return false;
+        
+        // Get current user ID from userStore
+        const currentUserId = $userStore?.recruiter_id;
+        if (!currentUserId) return false;
+        
+        // Check if current user ID exists in the verifications
+        return workExp.verifications.some(v => v.recruiter_id === currentUserId);
+    }
+
+    function openVerificationModal(experience: WorkExperienceView, unverify = false) {
         experienceToVerify = experience;
+        isUnverifying = unverify;
         verificationError = "";
         verificationModal = true;
     }
 
     function closeVerificationModal() {
         verificationModal = false;
-        experienceToVerify = null; // Clear selection
+        experienceToVerify = null;
+        isUnverifying = false;
     }
 
-    // Updated verification handler - Re-fetches data on success
     async function handleVerifyExperience() {
         if (!experienceToVerify) return;
 
-        const expIdToVerify = experienceToVerify.id; // Store ID before clearing state
+        const expIdToVerify = experienceToVerify.id;
 
         try {
             verificationLoading = true;
             verificationError = "";
 
-            // Call the updated API endpoint
-            const response = await verifyWorkExperience(
-                candidateId,
-                expIdToVerify,
-            );
+            if (isUnverifying) {
+                // Placeholder for unverify functionality
+                console.log("Unverify experience ID:", expIdToVerify);
+                const response = await unverifyWorkExperience(
+                    candidateId,
+                    expIdToVerify,
+                );
+                // For now, just refresh the data to simulate the change
+            } else {
+                // Regular verify flow
+                const response = await verifyWorkExperience(
+                    candidateId,
+                    expIdToVerify,
+                );
+                console.log("Verification successful:", response.message);
+            }
 
-            console.log("Verification successful:", response.message); // Log success
-
-            // --- Re-fetch the work experience data to update the UI accurately ---
-            await loadCandidatesWorkExperience(candidateId); // Reload data
+            // Re-fetch the work experience data to update the UI
+            await loadCandidatesWorkExperience(candidateId);
 
             // Close modal
             closeVerificationModal();
         } catch (error) {
-            console.error("Failed to verify experience:", error);
+            console.error(`Failed to ${isUnverifying ? 'unverify' : 'verify'} experience:`, error);
             verificationError =
                 error instanceof Error
                     ? error.message
-                    : "An error occurred while verifying the experience.";
-            // Keep the modal open to show the error
+                    : `An error occurred while ${isUnverifying ? 'unverifying' : 'verifying'} the experience.`;
         } finally {
             verificationLoading = false;
-            // experienceToVerify = null; // Don't clear here if we keep modal open on error
         }
     }
 
@@ -153,18 +173,16 @@
     function formatVerificationDate(dateString: string): string {
         try {
             const date = new Date(dateString);
-            // Example format: Mar 28, 2025, 10:30 AM
             return date.toLocaleString(undefined, {
-                // Use user's locale
                 year: "numeric",
                 month: "short",
                 day: "numeric",
                 hour: "numeric",
                 minute: "2-digit",
-                hour12: true, // Use AM/PM
+                hour12: true,
             });
         } catch (e) {
-            return "Invalid date"; // Fallback for parsing errors
+            return "Invalid date";
         }
     }
 </script>
@@ -203,6 +221,7 @@
             {:else if work_exp && work_exp.length > 0}
                 <ul class="divide-y divide-gray-200">
                     {#each work_exp as workExp (workExp.id)}
+                        {@const userVerified = isVerifiedByCurrentUser(workExp)}
                         <li class="relative border-l border-gray-200 py-4 pl-8">
                             <span
                                 class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-red-600"
@@ -308,16 +327,30 @@
                                             </div>
                                         {/if}
 
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors mt-1"
-                                            onclick={() =>
-                                                openVerificationModal(workExp)}
-                                            aria-label={`Verify experience at ${workExp.company}`}
-                                        >
-                                            <Shield class="h-3 w-3 mr-1" />
-                                            Verify
-                                        </button>
+                                        <!-- Conditional button: Verify or Unverify -->
+                                        {#if userVerified}
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
+                                                onclick={() =>
+                                                    openVerificationModal(workExp, true)}
+                                                aria-label={`Unverify experience at ${workExp.company}`}
+                                            >
+                                                <X class="h-3 w-3 mr-1" />
+                                                Unverify
+                                            </button>
+                                        {:else}
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors mt-1"
+                                                onclick={() =>
+                                                    openVerificationModal(workExp, false)}
+                                                aria-label={`Verify experience at ${workExp.company}`}
+                                            >
+                                                <Shield class="h-3 w-3 mr-1" />
+                                                Verify
+                                            </button>
+                                        {/if}
                                     </div>
                                 </div>
 
@@ -362,7 +395,7 @@
         >
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">
-                    Verify Work Experience
+                    {isUnverifying ? 'Unverify' : 'Verify'} Work Experience
                 </h3>
             </div>
             <div class="p-6">
@@ -390,7 +423,13 @@
 
                 <div class="flex justify-between items-center mt-6">
                     <div class="text-sm text-gray-500">
-                        <p>Your verification will be recorded.</p>
+                        <p>
+                            {#if isUnverifying}
+                                Your verification will be removed.
+                            {:else}
+                                Your verification will be recorded.
+                            {/if}
+                        </p>
                     </div>
                     <div class="flex gap-2">
                         <button
@@ -403,14 +442,21 @@
                         </button>
                         <button
                             type="button"
-                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center disabled:opacity-75"
+                            class={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                                isUnverifying ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center disabled:opacity-75`}
                             onclick={handleVerifyExperience}
                             disabled={verificationLoading}
                         >
                             {#if verificationLoading}
-                                <Loader class="h-4 w-4 mr-2 animate-spin" /> Verifying...
+                                <Loader class="h-4 w-4 mr-2 animate-spin" /> 
+                                {isUnverifying ? 'Unverifying...' : 'Verifying...'}
                             {:else}
-                                <CheckCircle class="h-4 w-4 mr-2" /> Verify Experience
+                                {#if isUnverifying}
+                                    <X class="h-4 w-4 mr-2" /> Unverify Experience
+                                {:else}
+                                    <CheckCircle class="h-4 w-4 mr-2" /> Verify Experience
+                                {/if}
                             {/if}
                         </button>
                     </div>
