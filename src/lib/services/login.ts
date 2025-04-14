@@ -19,7 +19,6 @@ export async function loginUser(userData: LoginRequest): Promise<LoginResponse> 
         return {
 
             access_token: data.access_token,
-            refresh_token: data.refresh_token,
             account_type: data.account_type
         };
     } catch (error) {

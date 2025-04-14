@@ -31,12 +31,10 @@
         try {
             const result = await loginUser({ email, password });
 
-            if (result.access_token && result.refresh_token) {
+            if (result.access_token) {
                 // Store tokens in localStorage
                 localStorage.setItem("access_token", result.access_token);
-                localStorage.setItem("refresh_token", result.refresh_token);
 
-                // Store token expiry time (assuming token expires in 1 hour)
                 const expiryTime = new Date();
                 expiryTime.setHours(expiryTime.getHours() + 1);
                 localStorage.setItem("token_expiry", expiryTime.toISOString());
@@ -139,7 +137,7 @@
                         <div class="flex items-center justify-between">
                             <Label for="password">Password</Label>
                             <a
-                                href="#"
+                                href="/forgot-password"
                                 class="text-sm text-primary hover:text-primary/80 font-medium"
                                 >Forgot password?</a
                             >
@@ -275,7 +273,7 @@
                 <p class="text-sm text-muted-foreground">
                     Don't have an account?
                     <a
-                        href="#"
+                        href="/signup"
                         class="font-medium text-primary hover:text-primary/80"
                         >Sign up</a
                     >
