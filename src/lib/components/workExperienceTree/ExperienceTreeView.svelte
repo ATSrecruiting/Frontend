@@ -45,10 +45,10 @@
     let verificationError = $state("");
     let isUnverifying = $state(false); // New state to track if we're verifying or unverifying
 
-    // State to manage visibility of verifier lists (using experience ID as key)
+
     let visibleVerifiers = $state<Record<string, boolean>>({});
 
-    // --- Functions ---
+    
 
     function toggleExpanded() {
         isExpanded = !isExpanded;
