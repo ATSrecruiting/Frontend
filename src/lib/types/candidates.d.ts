@@ -51,7 +51,7 @@ export interface WorkExperienceView {
     start_date: string | null;
     end_date: string | null;
     location: string | null;
-    attachments: Attachments[]; // Keep existing attachments structure
+    attachments: string[]; // Keep existing attachments structure
     // Replace is_verified and verified_by with the new verifications array
     verifications: VerificationDetailResponse[];
 }
