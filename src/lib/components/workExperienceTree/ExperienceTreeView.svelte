@@ -382,7 +382,7 @@
 {#if modalOpen}
     {@const currentExp = getCurrentExperience()}
     {#if currentExp}
-        <Carousel attachment_ids={currentExp.attachments} onClose={closeModal} />
+        <Carousel attachments={currentExp.attachments} onClose={closeModal} />
     {/if}
 {/if}
 

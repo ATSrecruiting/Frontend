@@ -57,7 +57,7 @@ export interface WorkExperienceView {
 }
 
 export interface EducationView {
-    id : string;
+    id: string;
     degree: string | null;
     major: string | null;
     school: string | null;
@@ -93,6 +93,20 @@ export interface VerifyWorkExperienceResponse {
 
 export interface UnVerifyWorkExperienceResponse {
     work_experience_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+
+
+export interface VerifyEducationResponse {
+    education_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+export interface UnVerifyEducationResponse {
+    education_id: string;
     recruiter_id: number; // ID of the recruiter who performed the verification
     message: string; // Confirmation message from backend
 }

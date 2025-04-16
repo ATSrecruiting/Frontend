@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -251,4 +251,74 @@ export async function unverifyWorkExperience(
     }
 
     return response.json(); // Return data matching VerifyWorkExperienceResponse
+}
+
+
+
+
+export async function verifyEducation(
+    candidateId: string,
+    educationId: string,
+): Promise<VerifyEducationResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education/${educationId}/verify`,
+        {
+            method: "PUT",
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return verifyEducation(candidateId, educationId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Handle potential conflict (e.g., 409 if already verified by this user, though backend might just return success)
+        // Handle other errors
+        const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+        console.error(`API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json();
+}
+
+
+export async function unverifyEducation(
+    candidateId: string,
+    educationId: string,
+): Promise<UnVerifyEducationResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education/${educationId}/verify`,
+        {
+            method: "PUT",
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return unverifyEducation(candidateId, educationId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Handle potential conflict (e.g., 409 if already verified by this user, though backend might just return success)
+        // Handle other errors
+        const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+        console.error(`API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json();
 }
