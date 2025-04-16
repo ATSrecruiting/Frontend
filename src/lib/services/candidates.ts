@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -142,6 +142,33 @@ export async function getCandidateWorkExperience(
             const refreshed = await authService.refreshToken();
             if (refreshed) {
                 return getCandidateWorkExperience(candidateId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Consider more specific error handling based on status codes if needed
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience");
+    }
+
+    return response.json(); // Return data matching WorkExperienceView[]
+}
+
+export async function getCandidateEducation(
+    candidateId: string,
+): Promise<EducationView[]> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateEducation(candidateId); // Retry
             } else {
                 goto("/login"); // Redirect to login if refresh fails
                 throw new Error("Authentication expired. Please login again.");

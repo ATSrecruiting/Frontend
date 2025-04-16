@@ -56,6 +56,16 @@ export interface WorkExperienceView {
     verifications: VerificationDetailResponse[];
 }
 
+export interface EducationView {
+    id : string;
+    degree: string | null;
+    major: string | null;
+    school: string | null;
+    graduation_date: string | null;
+    attachments: string[]; // Keep existing attachments structure
+
+    verifications: VerificationDetailResponse[];
+}
 
 
 interface Address {
