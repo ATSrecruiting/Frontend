@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
 
     import { page } from "$app/state";
+  import EducationtreeView from "$lib/components/educationTree/EducationtreeView.svelte";
 
     let candidateId = page.params.candidateId;
     // Example candidate data
@@ -25,4 +26,5 @@
     <CandidateInfoCard {candidateId} />
 
     <ExperienceTreeView {candidateId} />
+    <EducationtreeView {candidateId} />
 </div>
