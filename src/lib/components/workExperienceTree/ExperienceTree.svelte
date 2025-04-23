@@ -99,31 +99,32 @@
 </script>
 
 <div class="mt-6 relative">
-  <!-- Work Experience Bubble at the start of the tree -->
+  <!-- Improved header/dropdown button -->
   <button
     type="button"
-    class="flex items-center mb-4 w-full text-left"
+    class="flex items-center mb-4 w-full text-left group focus:outline-none"
     onclick={toggleExpanded}
     onkeydown={(e) => e.key === "Enter" && toggleExpanded()}
     aria-expanded={isExpanded}
   >
-    <div class="rounded-full bg-red-600 py-2 px-4 flex items-center z-10">
-      {#if isExpanded}
-        <ChevronDown class="h-4 w-4 text-white mr-2" />
-      {:else}
-        <ChevronRight class="h-4 w-4 text-white mr-2" />
-      {/if}
-      <h2 class="text-xl font-bold text-white">Work Experience</h2>
+    <div class="w-full flex items-center justify-between border-b-2 border-black pb-2 transition-all duration-200">
+      <div class="flex items-center">
+        <h2 class="text-xl font-bold text-black mr-2">Work Experience</h2>
+      </div>
+      <div class="transform transition-transform duration-200 {isExpanded ? 'rotate-180' : ''}">
+        <ChevronDown class="h-5 w-5 text-black" />
+      </div>
     </div>
   </button>
 
   {#if isExpanded}
-    <div class="flow-root ml-3">
-      <ul class="divide-y divide-gray-200">
+    <div class="flow-root">
+      <ul class="divide-y divide-gray-100">
         {#each cvData?.cv_data?.work_experience || [] as workExp, index}
-          <li class="relative border-l border-gray-200 py-4 pl-8">
+          <li class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200">
+            <!-- Black dot instead of red -->
             <span
-              class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-red-600"
+              class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black"
             ></span>
 
             {#if editingIndex === index}
@@ -139,7 +140,7 @@
                     type="text"
                     name="company"
                     bind:value={editFormData.company}
-                    class="w-full rounded-md border border-gray-300 px-3 py-2"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
 
@@ -154,7 +155,7 @@
                       type="text"
                       name="start_date"
                       bind:value={editFormData.start_date}
-                      class="w-full rounded-md border border-gray-300 px-3 py-2"
+                      class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                   </div>
                   <div class="space-y-2">
@@ -167,7 +168,7 @@
                       type="text"
                       name="end_date"
                       bind:value={editFormData.end_date}
-                      class="w-full rounded-md border border-gray-300 px-3 py-2"
+                      class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                   </div>
                 </div>
@@ -182,7 +183,7 @@
                     type="text"
                     name="location"
                     bind:value={editFormData.location}
-                    class="w-full rounded-md border border-gray-300 px-3 py-2"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
 
@@ -196,7 +197,7 @@
                     type="text"
                     name="title"
                     bind:value={editFormData.title}
-                    class="w-full rounded-md border border-gray-300 px-3 py-2"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
 
@@ -204,14 +205,14 @@
                   <button
                     type="button"
                     onclick={() => handleUpdateWorkExperience(index)}
-                    class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:ring-4 focus:ring-red-300"
+                    class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                   >
                     Save
                   </button>
                   <button
                     type="button"
                     onclick={handleCancelEdit}
-                    class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300"
+                    class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 transition-colors"
                   >
                     Cancel
                   </button>
@@ -229,36 +230,36 @@
                     <div class="flex space-x-1">
                       <button
                         onclick={() => handleEditClick(index, workExp)}
-                        class="p-1 rounded-full hover:bg-gray-100"
+                        class="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         aria-label="Edit work experience"
                         type="button"
                       >
-                        <Pencil class="h-4 w-4 text-gray-500" />
+                        <Pencil class="h-4 w-4 text-gray-500 hover:text-black" />
                       </button>
                       <button
                         onclick={() => handleDeleteWorkExperience(index)}
-                        class="p-1 rounded-full hover:bg-gray-100 hover:text-red-500"
+                        class="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         aria-label="Delete work experience"
                         type="button"
                       >
                         <Trash2
-                          class="h-4 w-4 text-gray-500 hover:text-red-500"
+                          class="h-4 w-4 text-gray-500 hover:text-black"
                         />
                       </button>
                     </div>
                   </div>
                 </div>
-                <p class="text-base text-gray-500">{workExp.location}</p>
-                <p class="text-base text-gray-500">{workExp.title}</p>
+                <p class="text-base text-gray-700">{workExp.location}</p>
+                <p class="text-base text-gray-700">{workExp.title}</p>
               </div>
             {/if}
           </li>
         {/each}
 
-        <!-- Add new experience button at the end of the timeline -->
-        <li class="relative border-l border-gray-200 py-4 pl-8">
+        <!-- Add new experience button with improved styling -->
+        <li class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200">
           <span
-            class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-red-600 flex items-center justify-center"
+            class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black flex items-center justify-center"
           >
             <Plus class="h-2 w-2 text-white" />
           </span>
@@ -275,7 +276,7 @@
                   type="text"
                   name="company"
                   bind:value={newWorkExperience.company}
-                  class="w-full rounded-md border border-gray-300 px-3 py-2"
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
 
@@ -289,7 +290,7 @@
                     type="text"
                     name="start_date"
                     bind:value={newWorkExperience.start_date}
-                    class="w-full rounded-md border border-gray-300 px-3 py-2"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <div class="space-y-2">
@@ -302,7 +303,7 @@
                     name="end_date"
                     bind:value={newWorkExperience.end_date}
                     placeholder="Leave empty for 'Present'"
-                    class="w-full rounded-md border border-gray-300 px-3 py-2"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
@@ -316,7 +317,7 @@
                   type="text"
                   name="location"
                   bind:value={newWorkExperience.location}
-                  class="w-full rounded-md border border-gray-300 px-3 py-2"
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
 
@@ -329,7 +330,7 @@
                   type="text"
                   name="title"
                   bind:value={newWorkExperience.title}
-                  class="w-full rounded-md border border-gray-300 px-3 py-2"
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
 
@@ -337,14 +338,14 @@
                 <button
                   type="button"
                   onclick={handleSaveNewWorkExperience}
-                  class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:ring-4 focus:ring-red-300"
+                  class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                 >
                   Add Experience
                 </button>
                 <button
                   type="button"
                   onclick={handleCancelAdd}
-                  class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300"
+                  class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
@@ -352,7 +353,7 @@
             </div>
           {:else}
             <button
-              class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center"
+              class="text-black hover:text-gray-600 text-sm font-medium flex items-center transition-colors"
               type="button"
               onclick={handleAddClick}
             >
