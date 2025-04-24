@@ -1,4 +1,3 @@
-
 <script lang="ts" module>
     declare global {
         interface Window {
@@ -8,15 +7,12 @@
 </script>
 
 <script lang="ts">
-  import { getWorkexperienceAttachments } from "$lib/services/attachements";
+    import { getWorkexperienceAttachments } from "$lib/services/attachements";
 
     import { onMount } from "svelte";
     import { scale } from "svelte/transition";
-    import type {Attachments} from "$lib/types/attachments";
-    
-    // Define file attachment interface
+    import type { Attachments } from "$lib/types/attachments";
 
-    
     // Props
     let { attachment_ids, onClose } = $props<{
         attachment_ids: string[];
@@ -29,7 +25,8 @@
     let isLoading = $state(true);
     let attachments = $state<Attachments[]>([]);
     let error = $state<string | null>(null);
-    
+    let pdfIframe = $state<HTMLIFrameElement | null>(null);
+
     let currentDoc = $derived.by(() => {
         if (attachments.length > 0) {
             return attachments[currentDocIndex];
@@ -42,7 +39,6 @@
         isLoading = true;
         error = null;
 
-        
         try {
             const response = await getWorkexperienceAttachments(attachment_ids);
             attachments = response;
@@ -55,32 +51,26 @@
     }
 
     // Document carousel functions
-    function getDocumentType(url: string) {
-        if (!url) return "";
-        const extension = url.split(".").pop()?.toLowerCase() || "";
+    function getDocumentType(filename: string) {
+        if (!filename) return "";
+        const extension = filename.split(".").pop()?.toLowerCase() || "";
         return extension === "pdf" ? "pdf" : "image";
     }
 
     function nextDocument() {
         if (attachments.length === 0) return;
         currentDocIndex = (currentDocIndex + 1) % attachments.length;
-
-        if (getDocumentType(attachments[currentDocIndex].download_url) === "pdf") {
-            pdfViewerLoaded = false;
-        }
+        pdfViewerLoaded = false;
     }
 
     function previousDocument() {
         if (attachments.length === 0) return;
         currentDocIndex =
             (currentDocIndex - 1 + attachments.length) % attachments.length;
-
-        if (getDocumentType(attachments[currentDocIndex].download_url) === "pdf") {
-            pdfViewerLoaded = false;
-        }
+        pdfViewerLoaded = false;
     }
 
-    function onPdfLoaded() {
+    function handleIframeLoad() {
         pdfViewerLoaded = true;
     }
 
@@ -94,27 +84,12 @@
         }
     }
 
-    // Load PDF.js on mount and fetch file details
+    // Load data on mount
     onMount(() => {
-        // Load PDF.js
-        const script = document.createElement("script");
-        script.src =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js";
-        script.async = true;
-        document.head.appendChild(script);
-
-        script.onload = () => {
-            if (window.pdfjsLib) {
-                window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-                    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
-            }
-        };
-        
-        // Fetch file details
         fetchFileDetails();
 
         return () => {
-            document.head.removeChild(script);
+            // Any cleanup needed
         };
     });
 </script>
@@ -149,40 +124,46 @@
         >
             ×
         </button>
-        
+
         <!-- Loading state -->
         {#if isLoading}
             <div class="flex-grow flex items-center justify-center">
-                <div class="bg-white/80 p-6 rounded text-lg">Loading files...</div>
+                <div class="bg-white/80 p-6 rounded text-lg">
+                    Loading files...
+                </div>
             </div>
-        <!-- Error state -->
+            <!-- Error state -->
         {:else if error}
             <div class="flex-grow flex items-center justify-center">
                 <div class="bg-red-100 text-red-700 p-6 rounded">
                     <p>Error: {error}</p>
-                    <button 
-                        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded" 
+                    <button
+                        class="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
                         onclick={fetchFileDetails}
                     >
                         Retry
                     </button>
                 </div>
             </div>
-        <!-- No files state -->
+            <!-- No files state -->
         {:else if attachments.length === 0}
             <div class="flex-grow flex items-center justify-center">
                 <div class="bg-gray-100 p-6 rounded">No files to display</div>
             </div>
-        <!-- Document viewer -->
+            <!-- Document viewer -->
         {:else if currentDoc}
             <div class="flex-grow relative">
-                {#if getDocumentType(currentDoc.download_url) === "pdf"}
-                    <iframe
-                        src={`${currentDoc.download_url}#toolbar=0`}
-                        title={currentDoc.filename}
-                        class="w-full h-full border-none"
-                        onload={onPdfLoaded}
-                    ></iframe>
+                {#if getDocumentType(currentDoc.filename) === "pdf"}
+                    <div class="w-full h-full">
+                        <iframe
+                            bind:this={pdfIframe}
+                            src={currentDoc.download_url}
+                            title={currentDoc.filename}
+                            class="w-full h-full border-none"
+                            onload={handleIframeLoad}
+                            sandbox="allow-scripts allow-same-origin"
+                        ></iframe>
+                    </div>
                     {#if !pdfViewerLoaded}
                         <div
                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/80 p-4 rounded"
