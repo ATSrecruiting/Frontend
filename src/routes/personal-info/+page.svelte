@@ -12,6 +12,7 @@
   import CertificationTree from "$lib/components/certificationTree/CertificationTree.svelte";
   import FileUploadComponent from "$lib/components/attachementUpload/AttachementUpload.svelte";
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
+  import WhoAmI from "$lib/components/whoAmI/WhoAmI.svelte";
 
   let data = $state<SubmitResumeApiRequest>({
     file_id: $cvData?.file_id ?? "",
@@ -77,7 +78,11 @@
     <EducationTree cvData={data} />
     <CertificationTree cvData={data} />
 
+    <WhoAmI cvData={data} />
+
     <FileUploadComponent cvData={data} userId={userid} />
+
+
 
     <div class="flex items-center gap-2">
       <Checkbox bind:checked={is_checked} />
