@@ -13,6 +13,7 @@
   import FileUploadComponent from "$lib/components/attachementUpload/AttachementUpload.svelte";
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
   import WhoAmI from "$lib/components/whoAmI/WhoAmI.svelte";
+  import PersonalGrowth from "$lib/components/personalGrowth/personalGrowth.svelte";
 
   let data = $state<SubmitResumeApiRequest>({
     file_id: $cvData?.file_id ?? "",
@@ -79,6 +80,8 @@
     <CertificationTree cvData={data} />
 
     <WhoAmI cvData={data} />
+
+    <PersonalGrowth cvData={data} />
 
     <FileUploadComponent cvData={data} userId={userid} />
 
