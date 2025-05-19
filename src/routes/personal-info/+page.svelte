@@ -14,6 +14,7 @@
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
   import WhoAmI from "$lib/components/whoAmI/WhoAmI.svelte";
   import PersonalGrowth from "$lib/components/personalGrowth/personalGrowth.svelte";
+  import SucessStories from "$lib/components/successStories/SucessStories.svelte";
 
   let data = $state<SubmitResumeApiRequest>({
     file_id: $cvData?.file_id ?? "",
@@ -82,6 +83,7 @@
     <WhoAmI cvData={data} />
 
     <PersonalGrowth cvData={data} />
+    <SucessStories cvData={data} />
 
     <FileUploadComponent cvData={data} userId={userid} />
 
