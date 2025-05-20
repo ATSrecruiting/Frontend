@@ -50,10 +50,34 @@
         languages: [],
       },
       certifications:
-        $cvData?.cv_data.certifications.map((cert) => ({
+        $cvData?.cv_data?.certifications.map((cert) => ({
           ...cert,
           attachment_ids: [],
         })) ?? [],
+      personal_growth:
+        $cvData?.cv_data?.personal_growth?.map((pg) => ({
+          ...pg,
+          attachment_ids: [],
+        })) ?? [],
+        who_am_i: $cvData?.cv_data?.who_am_i
+          ? {
+              ...$cvData.cv_data.who_am_i,
+              attachment_ids: [],
+            }
+          : {
+              personal_statement: "",
+              core_values: [],
+              working_style: [],
+              motivators: [],
+              interests_passions: [],
+              attachment_ids: [],
+            },
+          success_stories:
+            $cvData?.cv_data?.success_stories?.map((ss) => ({
+              ...ss,
+              attachment_ids: [],
+            })) ?? [],
+        
     },
   });
   let userid = page.url.searchParams.get("userId");

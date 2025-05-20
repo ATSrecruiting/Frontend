@@ -6,24 +6,17 @@
     Trash2,
   } from "lucide-svelte";
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
+  import type { SuccessStory } from "$lib/types/uploadResume";
 
-  // Define the type for Success Story
-  type SuccessStory = {
-    headline: string;
-    situation: string;
-    actions: string;
-    results: string;
-    skills: string[];
-    relevant_experience: string;
-    timeframe: string;
-  };
+
 
   let { cvData } = $props<{ cvData: SubmitResumeApiRequest | null }>();
 
-  // Using $state for reactive variables
+
   let editingIndex = $state(-1);
-  let isExpanded = $state(true); // State to track if success stories section is expanded
-  let isAddingNew = $state(false); // State to track if adding new story
+  let isExpanded = $state(true); 
+  let isAddingNew = $state(false);
+
   let editFormData = $state<SuccessStory>({
     headline: "",
     situation: "",

@@ -1,3 +1,6 @@
+
+
+
 export interface SubmitResumeApiRequest {
     file_id: string;
     filename: string;
@@ -20,6 +23,9 @@ export interface CVDataRequest {
     education: EducationRequest[];
     skills: SkillSetRequest;
     certifications: CertificationRequest[];
+    personal_growth: PersonalGrowthRequest[];
+    who_am_i: WhoAmIRequest;
+    success_stories: SuccessStoryRequest[];
 }
 
 export interface AddressRequest {
@@ -59,3 +65,33 @@ export interface CertificationRequest {
     certification_name: string;
     attachment_ids: string[]
 }
+
+export interface PersonalGrowthRequest {
+    area_of_focus: string;
+    activity_method: string;
+    description: string;
+    timeframe: string;
+    skills_gained: string[];
+    attachment_ids: string[]
+}
+
+export interface WhoAmIRequest {
+    personal_statement: string;
+    core_values: string[];
+    working_style: string[];
+    motivators: string[];
+    interests_passions: string[];
+    attachment_ids: string[]
+}
+
+
+  export interface SuccessStoryRequest  {
+    headline: string;
+    situation: string;
+    actions: string;
+    results: string;
+    skills: string[];
+    relevant_experience: string;
+    timeframe: string;
+    attachment_ids: string[]
+  };

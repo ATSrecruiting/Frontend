@@ -7,12 +7,38 @@
       Trash2
     } from "lucide-svelte";
     import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
+    import type { PersonalGrowth } from "$lib/types/uploadResume";
   
     let { cvData } = $props<{ cvData: SubmitResumeApiRequest | null }>();
     
     let editingIndex = $state(-1);
     let isExpanded = $state(true);
     let isAddingNew = $state(false);
+
+    let editFormData = $state<PersonalGrowth>({
+      area_of_focus: "",
+      activity_method: "",
+      description: "",
+      timeframe: "",
+      skills_gained: []
+    });
+
+    let newPersonalGrowth = $state<PersonalGrowth>({
+      area_of_focus: "",
+      activity_method: "",
+      description: "",
+      timeframe: "",
+      skills_gained: []
+    });
+
+    let newCustomSkill = $state("");
+    let editCustomSkill = $state("");
+
+    const defaultSkills = [
+      'Leadership', 'Communication', 'Problem Solving', 'Technical Skills', 
+      'Creativity', 'Teamwork', 'Public Speaking', 'Confidence', 
+      'Organization', 'Team Management'
+    ];
   
     function toggleExpanded() {
       isExpanded = !isExpanded;
@@ -21,6 +47,15 @@
     function handleAddClick() {
       isAddingNew = true;
       editingIndex = -1;
+      // Reset new personal growth form
+      newPersonalGrowth = {
+        area_of_focus: "",
+        activity_method: "",
+        description: "",
+        timeframe: "",
+        skills_gained: []
+      };
+      newCustomSkill = "";
     }
   
     function handleCancelAdd() {
@@ -30,10 +65,84 @@
     function handleEditClick(index: number) {
       editingIndex = index;
       isAddingNew = false;
+      // Copy the existing data to the edit form
+      const growthToEdit = cvData.cv_data.personal_growth[index];
+      editFormData = {
+        area_of_focus: growthToEdit.area_of_focus,
+        activity_method: growthToEdit.activity_method,
+        description: growthToEdit.description,
+        timeframe: growthToEdit.timeframe,
+        skills_gained: [...growthToEdit.skills_gained]
+      };
+      editCustomSkill = "";
     }
   
     function handleCancelEdit() {
       editingIndex = -1;
+    }
+
+    function handleSaveNewPersonalGrowth() {
+      if (!cvData.cv_data.personal_growth) {
+        cvData.cv_data.personal_growth = [];
+      }
+      
+      // Add the new personal growth to the cv data
+      cvData.cv_data.personal_growth = [
+        ...cvData.cv_data.personal_growth,
+        { ...newPersonalGrowth }
+      ];
+      
+      // Reset the form
+      handleCancelAdd();
+    }
+
+    function handleUpdateExistingGrowth(index: number) {
+      if (!cvData.cv_data.personal_growth) {
+        cvData.cv_data.personal_growth = [];
+      }
+      
+      // Update the existing personal growth item
+      cvData.cv_data.personal_growth[index] = { ...editFormData };
+      
+      // Close the edit form
+      handleCancelEdit();
+    }
+
+    function handleDeleteGrowth(index: number) {
+      if (cvData.cv_data.personal_growth) {
+        // Filter out the item at the specified index
+        cvData.cv_data.personal_growth = cvData.cv_data.personal_growth.filter((_: unknown, i: number) => i !== index);
+      }
+    }
+
+    function toggleSkillInNew(skill: string) {
+      if (newPersonalGrowth.skills_gained.includes(skill)) {
+        newPersonalGrowth.skills_gained = newPersonalGrowth.skills_gained.filter(s => s !== skill);
+      } else {
+        newPersonalGrowth.skills_gained = [...newPersonalGrowth.skills_gained, skill];
+      }
+    }
+
+    function toggleSkillInEdit(skill: string) {
+      if (editFormData.skills_gained.includes(skill)) {
+        editFormData.skills_gained = editFormData.skills_gained.filter(s => s !== skill);
+      } else {
+        editFormData.skills_gained = [...editFormData.skills_gained, skill];
+      }
+    }
+
+    function addCustomSkillToNew() {
+      if (newCustomSkill && !newPersonalGrowth.skills_gained.includes(newCustomSkill)) {
+        newPersonalGrowth.skills_gained = [...newPersonalGrowth.skills_gained, newCustomSkill];
+        newCustomSkill = "";
+      }
+    }
+
+    function addCustomSkillToEdit() {
+      if (editCustomSkill && !editFormData.skills_gained.includes(editCustomSkill)) {
+        editFormData.skills_gained = [...editFormData.skills_gained, editCustomSkill];
+        editCustomSkill = "";
+      }
     }
   </script>
   
@@ -66,19 +175,7 @@
       <div class="flow-root">
         <ul class="divide-y divide-gray-100">
           <!-- Example Growth Items - In real implementation, these would be populated from cvData -->
-          {#each [{
-            area_of_focus: "Public Speaking",
-            activity_method: "Joined Toastmasters club & completed 5 speeches",
-            description: "Overcame significant anxiety presenting to groups. Learned structuring arguments effectively and engaging an audience. Received positive feedback on clarity.",
-            timeframe: "Jan 2024 - Present",
-            skills_gained: ["Public Speaking", "Confidence", "Communication"]
-          }, {
-            area_of_focus: "Leadership",
-            activity_method: "Led volunteer project with 10 team members",
-            description: "Organized community cleanup initiative, coordinated team schedules, and delegated responsibilities to maximize impact.",
-            timeframe: "Summer 2024",
-            skills_gained: ["Leadership", "Organization", "Team Management"]
-          }] as growth, index}
+          {#each cvData?.cv_data?.personal_growth || [] as growth, index}
             <li
               class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200"
             >
@@ -96,7 +193,7 @@
                     <input
                       id={`area-of-focus-${index}`}
                       type="text"
-                      value={growth.area_of_focus}
+                      bind:value={editFormData.area_of_focus}
                       class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                   </div>
@@ -109,7 +206,7 @@
                     <input
                       id={`activity-method-${index}`}
                       type="text"
-                      value={growth.activity_method}
+                      bind:value={editFormData.activity_method}
                       class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                   </div>
@@ -122,8 +219,9 @@
                     <textarea
                       id={`description-${index}`}
                       rows="3"
+                      bind:value={editFormData.description}
                       class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
-                    >{growth.description}</textarea>
+                    ></textarea>
                   </div>
   
                   <div class="space-y-2">
@@ -134,7 +232,7 @@
                     <input
                       id={`timeframe-${index}`}
                       type="text"
-                      value={growth.timeframe}
+                      bind:value={editFormData.timeframe}
                       class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                   </div>
@@ -142,13 +240,14 @@
                   <div class="space-y-2">
                     <label class="block text-sm font-medium">Skills Gained/Improved</label>
                     <div class="flex flex-wrap gap-2">
-                      {#each ['Leadership', 'Communication', 'Problem Solving', 'Technical Skills', 'Creativity', 'Teamwork', 'Public Speaking', 'Confidence', 'Organization', 'Team Management'] as skill}
+                      {#each defaultSkills as skill}
                         <div class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm">
                           <input 
                             type="checkbox" 
                             id={`skill-${index}-${skill}`} 
                             class="mr-2" 
-                            checked={growth.skills_gained.includes(skill)}
+                            checked={editFormData.skills_gained.includes(skill)}
+                            onchange={() => toggleSkillInEdit(skill)}
                           />
                           <label for={`skill-${index}-${skill}`}>{skill}</label>
                         </div>
@@ -158,10 +257,12 @@
                       <input
                         type="text"
                         placeholder="Add custom skill..."
+                        bind:value={editCustomSkill}
                         class="rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                       />
                       <button
                         type="button"
+                        onclick={addCustomSkillToEdit}
                         class="rounded-r-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                       >
                         Add
@@ -172,7 +273,7 @@
                   <div class="flex space-x-2">
                     <button
                       type="button"
-                      onclick={() => {/* Save logic would go here */; handleCancelEdit();}}
+                      onclick={() => handleUpdateExistingGrowth(index)}
                       class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                     >
                       Save
@@ -203,7 +304,7 @@
                           />
                         </button>
                         <button
-                          onclick={() => {/* Delete logic would go here */}}
+                          onclick={() => handleDeleteGrowth(index)}
                           class="p-1 rounded-full hover:bg-gray-100 transition-colors"
                           aria-label="Delete growth item"
                           type="button"
@@ -252,6 +353,7 @@
                     id="new-area-of-focus"
                     type="text"
                     placeholder="e.g., Leadership, Technical Skill, Communication"
+                    bind:value={newPersonalGrowth.area_of_focus}
                     class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
@@ -265,6 +367,7 @@
                     id="new-activity-method"
                     type="text"
                     placeholder="e.g., Online Course, Workshop, Self-Directed Project"
+                    bind:value={newPersonalGrowth.activity_method}
                     class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
@@ -278,6 +381,7 @@
                     id="new-description"
                     rows="3"
                     placeholder="Brief narrative on what was done and learned, or the impact it had"
+                    bind:value={newPersonalGrowth.description}
                     class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   ></textarea>
                 </div>
@@ -291,6 +395,7 @@
                     id="new-timeframe"
                     type="text"
                     placeholder="e.g., Jan 2024 - Present, Q3 2024, Ongoing"
+                    bind:value={newPersonalGrowth.timeframe}
                     class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
@@ -298,9 +403,15 @@
                 <div class="space-y-2">
                   <label class="block text-sm font-medium">Skills Gained/Improved</label>
                   <div class="flex flex-wrap gap-2">
-                    {#each ['Leadership', 'Communication', 'Problem Solving', 'Technical Skills', 'Creativity', 'Teamwork', 'Public Speaking', 'Confidence', 'Organization', 'Team Management'] as skill}
+                    {#each defaultSkills as skill}
                       <div class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm">
-                        <input type="checkbox" id={`new-skill-${skill}`} class="mr-2" />
+                        <input 
+                          type="checkbox" 
+                          id={`new-skill-${skill}`} 
+                          class="mr-2" 
+                          checked={newPersonalGrowth.skills_gained.includes(skill)}
+                          onchange={() => toggleSkillInNew(skill)}
+                        />
                         <label for={`new-skill-${skill}`}>{skill}</label>
                       </div>
                     {/each}
@@ -309,10 +420,12 @@
                     <input
                       type="text"
                       placeholder="Add custom skill..."
+                      bind:value={newCustomSkill}
                       class="rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                     <button
                       type="button"
+                      onclick={addCustomSkillToNew}
                       class="rounded-r-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                     >
                       Add
@@ -323,7 +436,7 @@
                 <div class="flex space-x-2">
                   <button
                     type="button"
-                    onclick={() => {/* Save new logic would go here */; handleCancelAdd();}}
+                    onclick={handleSaveNewPersonalGrowth}
                     class="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:ring-2 focus:ring-gray-300 transition-colors"
                   >
                     Add Growth Item

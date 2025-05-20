@@ -20,6 +20,9 @@ export interface CVData {
   education: Education[];
   skills: SkillSet;
   certifications: Certification[];
+  personal_growth: PersonalGrowth[];
+  who_am_i: WhoAmI;
+  success_stories: SuccessStory[];
 }
 
 export interface Address {
@@ -55,3 +58,30 @@ export interface Certification {
   certifier: string;
   certification_name: string;
 }
+
+export interface PersonalGrowth {
+    area_of_focus: string;
+    activity_method: string;
+    description: string;
+    timeframe: string;
+    skills_gained: string[];
+}
+
+export interface WhoAmI {
+  personal_statement: string;
+  core_values: string[];
+  working_style: string[];
+  motivators: string[];
+  interests_passions: string[];
+}
+
+
+  export interface SuccessStory{
+    headline: string;
+    situation: string;
+    actions: string;
+    results: string;
+    skills: string[];
+    relevant_experience: string;
+    timeframe: string;
+  };
