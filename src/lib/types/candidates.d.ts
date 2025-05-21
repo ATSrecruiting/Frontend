@@ -68,6 +68,16 @@ export interface EducationView {
 }
 
 
+export interface CertificationView {
+    id: string;
+    certifier: string | null;
+    certification_name: string | null;
+    attachments: string[]; // Keep existing attachments structure
+
+    verifications: VerificationDetailResponse[];
+}
+
+
 interface Address {
     street: string;
     country: string;
@@ -107,6 +117,18 @@ export interface VerifyEducationResponse {
 
 export interface UnVerifyEducationResponse {
     education_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+export interface VerifyCertificationResponse {
+    certification_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+export interface UnVerifyCertificationResponse {
+    certification_id: string;
     recruiter_id: number; // ID of the recruiter who performed the verification
     message: string; // Confirmation message from backend
 }

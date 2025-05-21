@@ -1,5 +1,10 @@
 <script lang="ts">
     import {
+        getCandidateCertification,
+        unverifyCertification,
+        verifyCertification,
+    } from "$lib/services/candidates";
+    import {
         ChevronDown,
         Paperclip,
         CheckCircle,
@@ -7,41 +12,29 @@
         Loader,
         Users,
         Info,
-        X, // Added X icon for unverify
+        X,
+        School, // Added X icon for unverify
     } from "lucide-svelte";
-    import { onMount } from "svelte";
-    import type {
-        WorkExperienceView,
-        VerifyWorkExperienceResponse,
-        VerificationDetailResponse,
-    } from "$lib/types/candidates";
-    import {
-        getCandidateWorkExperience,
-        verifyWorkExperience,
-        unverifyWorkExperience,
-    } from "$lib/services/candidates";
-    import Carousel from "$lib/components/carousel/Carousel.svelte";
     import { userStore } from "$lib/stores/userStore";
+    import Carousel from "$lib/components/carousel/Carousel.svelte";
+    import type { CertificationView } from "$lib/types/candidates";
+    import { onMount } from "svelte";
 
-    // Props
-    let { candidateId } = $props<string>();
-
-    // Component State
+    let { candidateId } = $props<{ candidateId: string }>();
     let isExpanded = $state(true);
-    let work_exp = $state<WorkExperienceView[] | undefined>(undefined);
+    let certifications = $state<CertificationView[]>([]);
     let isLoading = $state(true);
     let fetchError = $state<string | null>(null);
 
-    // Modal State
-    let currentExpId = $state("");
+    let currentCertId = $state<string>("");
     let modalOpen = $state(false);
 
-    // Verification Modal State
     let verificationModal = $state(false);
-    let experienceToVerify = $state<WorkExperienceView | null>(null);
+    let certificationToVerify = $state<CertificationView | null>(null);
     let verificationLoading = $state(false);
-    let verificationError = $state("");
-    let isUnverifying = $state(false); // New state to track if we're verifying or unverifying
+    let verificationError = $state<string | null>(null);
+
+    let isUnverifying = $state(false);
 
     let visibleVerifiers = $state<Record<string, boolean>>({});
 
@@ -49,19 +42,19 @@
         isExpanded = !isExpanded;
     }
 
-    async function loadCandidatesWorkExperience(id: string) {
+    async function loadCandidatesCertifications(id: string) {
         isLoading = true;
         fetchError = null;
+
         try {
-            const data = await getCandidateWorkExperience(id);
-            work_exp = data;
-        } catch (error) {
-            console.error("Failed to load work experience:", error);
+            const response = await getCandidateCertification(id);
+            certifications = response;
+        } catch (err) {
             fetchError =
-                error instanceof Error
-                    ? error.message
-                    : "An unknown error occurred while fetching work experience.";
-            work_exp = [];
+                err instanceof Error
+                    ? err.message
+                    : "Failed to load certifications";
+            console.error("Error fetching certifications:", err);
         } finally {
             isLoading = false;
         }
@@ -69,17 +62,17 @@
 
     onMount(() => {
         if (candidateId) {
-            loadCandidatesWorkExperience(candidateId);
+            loadCandidatesCertifications(candidateId);
         } else {
             console.error("Candidate ID is missing.");
             fetchError = "Candidate ID is required.";
             isLoading = false;
-            work_exp = [];
+            certifications = [];
         }
     });
 
-    function openDocumentCarousel(expId: string) {
-        currentExpId = expId;
+    function openDocumentCarousel(certId: string) {
+        currentCertId = certId;
         modalOpen = true;
     }
 
@@ -87,93 +80,75 @@
         modalOpen = false;
     }
 
-    function getCurrentExperience(): WorkExperienceView | null {
-        if (!work_exp) return null;
-        return work_exp.find((exp) => exp.id === currentExpId) ?? null;
+    function getCurrentCertification(): CertificationView | null {
+        if (certifications.length > 0) {
+            return (
+                certifications.find((cert) => cert.id === currentCertId) || null
+            );
+        }
+        return null;
     }
 
-    // Check if the current user has already verified this experience
-    function isVerifiedByCurrentUser(workExp: WorkExperienceView): boolean {
-        if (!workExp.verifications || workExp.verifications.length === 0)
+    function isVerifiedByCurrentUser(cert: CertificationView): boolean {
+        if (!cert.verifications || cert.verifications.length === 0) {
             return false;
+        }
 
-        // Get current user ID from userStore
         const currentUserId = $userStore?.recruiter_id;
-        if (!currentUserId) return false;
-
-        // Check if current user ID exists in the verifications
-        return workExp.verifications.some(
-            (v) => v.recruiter_id === currentUserId,
+        if (!currentUserId) {
+            return false;
+        }
+        return cert.verifications.some(
+            (ver) => ver.recruiter_id === currentUserId,
         );
     }
 
-    function openVerificationModal(
-        experience: WorkExperienceView,
-        unverify = false,
-    ) {
-        experienceToVerify = experience;
+    function openVerificationModal(cert: CertificationView, unverify = false) {
+        certificationToVerify = cert;
         isUnverifying = unverify;
-        verificationError = "";
+        verificationError = null;
         verificationModal = true;
     }
 
     function closeVerificationModal() {
         verificationModal = false;
-        experienceToVerify = null;
+        certificationToVerify = null;
         isUnverifying = false;
+        verificationError = null;
     }
 
-    async function handleVerifyExperience() {
-        if (!experienceToVerify) return;
+    async function handleVerifyCertification() {
+        if (!certificationToVerify) return;
 
-        const expIdToVerify = experienceToVerify.id;
+        const certIdToVerify = certificationToVerify.id;
 
         try {
             verificationLoading = true;
-            verificationError = "";
+            verificationError = null;
 
             if (isUnverifying) {
-                // Placeholder for unverify functionality
-                console.log("Unverify experience ID:", expIdToVerify);
-                const response = await unverifyWorkExperience(
-                    candidateId,
-                    expIdToVerify,
-                );
-                // For now, just refresh the data to simulate the change
+                await unverifyCertification(candidateId, certIdToVerify);
             } else {
-                // Regular verify flow
-                const response = await verifyWorkExperience(
-                    candidateId,
-                    expIdToVerify,
-                );
-                console.log("Verification successful:", response.message);
+                await verifyCertification(candidateId, certIdToVerify);
             }
 
-            // Re-fetch the work experience data to update the UI
-            await loadCandidatesWorkExperience(candidateId);
-
-            // Close modal
+            await loadCandidatesCertifications(candidateId);
             closeVerificationModal();
-        } catch (error) {
-            console.error(
-                `Failed to ${isUnverifying ? "unverify" : "verify"} experience:`,
-                error,
-            );
+        } catch (err) {
             verificationError =
-                error instanceof Error
-                    ? error.message
-                    : `An error occurred while ${isUnverifying ? "unverifying" : "verifying"} the experience.`;
+                err instanceof Error
+                    ? err.message
+                    : "Failed to verify certification";
+            console.error("Error verifying certification:", err);
         } finally {
             verificationLoading = false;
         }
     }
 
-    // Toggle visibility of the verifier list for a specific experience
-    function toggleVerifiers(expId: string) {
-        visibleVerifiers[expId] = !visibleVerifiers[expId];
+    function toggleVerifiers(certId: string) {
+        visibleVerifiers[certId] = !visibleVerifiers[certId];
     }
 
-    // Helper to format date string
     function formatVerificationDate(dateString: string): string {
         try {
             const date = new Date(dateString);
@@ -192,11 +167,12 @@
 </script>
 
 <div class="mt-6 relative">
-    <!-- Updated header with black and white design -->
+    <!-- Header/dropdown button -->
     <button
         type="button"
         class="flex items-center mb-4 w-full text-left group focus:outline-none"
         onclick={toggleExpanded}
+        onkeydown={(e) => e.key === "Enter" && toggleExpanded()}
         aria-expanded={isExpanded}
     >
         <div
@@ -204,7 +180,7 @@
         >
             <div class="flex items-center">
                 <h2 class="text-xl font-bold text-black mr-2">
-                    Work Experience
+                    Certifications
                 </h2>
             </div>
             <div
@@ -223,7 +199,7 @@
                 <div
                     class="flex justify-center items-center py-10 text-gray-500"
                 >
-                    <Loader class="h-6 w-6 mr-2 animate-spin" /> Loading Experience...
+                    <Loader class="h-6 w-6 mr-2 animate-spin" /> Loading Certifications...
                 </div>
             {:else if fetchError}
                 <div
@@ -231,13 +207,14 @@
                 >
                     Error loading data: {fetchError}
                 </div>
-            {:else if work_exp && work_exp.length > 0}
+            {:else if certifications && certifications.length > 0}
                 <ul class="divide-y divide-gray-100">
-                    {#each work_exp as workExp (workExp.id)}
-                        {@const userVerified = isVerifiedByCurrentUser(workExp)}
+                    {#each certifications as cert (cert.id)}
+                        {@const userVerified = isVerifiedByCurrentUser(cert)}
                         <li
                             class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200"
                         >
+                            <!-- Black dot -->
                             <span
                                 class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black"
                             ></span>
@@ -246,28 +223,18 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <p class="text-lg font-semibold">
-                                            {workExp.company}
+                                            {cert.certification_name}
                                         </p>
                                         <p class="text-base text-gray-700">
-                                            {workExp.location}
-                                        </p>
-                                        <p class="text-base text-gray-700">
-                                            {workExp.title}
+                                            {cert.certifier}
                                         </p>
                                     </div>
                                     <div
                                         class="flex flex-col items-end space-y-1"
                                     >
-                                        <p
-                                            class="text-sm text-gray-500 whitespace-nowrap"
-                                        >
-                                            {workExp.start_date} - {workExp.end_date ??
-                                                "Present"}
-                                        </p>
-
-                                        {#if workExp.verifications && workExp.verifications.length > 0}
+                                        {#if cert.verifications && cert.verifications.length > 0}
                                             {@const count =
-                                                workExp.verifications.length}
+                                                cert.verifications.length}
                                             <div
                                                 class="flex items-center text-green-600 text-xs font-medium relative"
                                             >
@@ -279,7 +246,7 @@
                                                     <span
                                                         class="text-gray-500 ml-1"
                                                     >
-                                                        by {workExp
+                                                        by {cert
                                                             .verifications[0]
                                                             .recruiter_name ??
                                                             "Unknown"}
@@ -290,7 +257,7 @@
                                                         class="flex items-center text-gray-500 ml-1 hover:text-black transition-colors"
                                                         onclick={() =>
                                                             toggleVerifiers(
-                                                                workExp.id,
+                                                                cert.id,
                                                             )}
                                                         aria-label="Show verifiers"
                                                     >
@@ -299,7 +266,7 @@
                                                             class="h-3 w-3 ml-1"
                                                         />
                                                     </button>
-                                                    {#if visibleVerifiers[workExp.id]}
+                                                    {#if visibleVerifiers[cert.id]}
                                                         <div
                                                             class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs"
                                                         >
@@ -311,13 +278,14 @@
                                                             <ul
                                                                 class="space-y-1 max-h-40 overflow-y-auto"
                                                             >
-                                                                {#each workExp.verifications as verification}
+                                                                {#each cert.verifications as verification}
                                                                     <li>
                                                                         <span
                                                                             class="font-medium"
-                                                                            >{verification.recruiter_name ??
-                                                                                "Unknown"}</span
                                                                         >
+                                                                            {verification.recruiter_name ??
+                                                                                "Unknown"}
+                                                                        </span>
                                                                         <span
                                                                             class="text-gray-500 block text-[11px]"
                                                                         >
@@ -349,10 +317,10 @@
                                                 class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
                                                 onclick={() =>
                                                     openVerificationModal(
-                                                        workExp,
+                                                        cert,
                                                         true,
                                                     )}
-                                                aria-label={`Unverify experience at ${workExp.company}`}
+                                                aria-label={`Unverify certification ${cert.certification_name}`}
                                             >
                                                 <X class="h-3 w-3 mr-1" />
                                                 Unverify
@@ -363,10 +331,10 @@
                                                 class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-black transition-colors mt-1"
                                                 onclick={() =>
                                                     openVerificationModal(
-                                                        workExp,
+                                                        cert,
                                                         false,
                                                     )}
-                                                aria-label={`Verify experience at ${workExp.company}`}
+                                                aria-label={`Verify certification ${cert.certification_name}`}
                                             >
                                                 <Shield class="h-3 w-3 mr-1" />
                                                 Verify
@@ -375,15 +343,15 @@
                                     </div>
                                 </div>
 
-                                {#if workExp.attachments && workExp.attachments.length > 0}
+                                {#if cert.attachments && cert.attachments.length > 0}
                                     <button
                                         type="button"
                                         class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
                                         onclick={() =>
-                                            openDocumentCarousel(workExp.id)}
+                                            openDocumentCarousel(cert.id)}
                                     >
                                         <Paperclip class="h-4 w-4 mr-1" />
-                                        View Documents ({workExp.attachments
+                                        View Documents ({cert.attachments
                                             .length})
                                     </button>
                                 {/if}
@@ -393,7 +361,7 @@
                 </ul>
             {:else}
                 <div class="text-center py-6 text-gray-500">
-                    No work experience added for this candidate yet.
+                    No certifications added for this candidate yet.
                 </div>
             {/if}
         </div>
@@ -401,16 +369,16 @@
 </div>
 
 {#if modalOpen}
-    {@const currentExp = getCurrentExperience()}
-    {#if currentExp}
+    {@const currentCert = getCurrentCertification()}
+    {#if currentCert}
         <Carousel
-            attachment_ids={currentExp.attachments}
+            attachment_ids={currentCert.attachments}
             onClose={closeModal}
         />
     {/if}
 {/if}
 
-{#if verificationModal && experienceToVerify}
+{#if verificationModal && certificationToVerify}
     <div
         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
     >
@@ -419,21 +387,16 @@
         >
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">
-                    {isUnverifying ? "Unverify" : "Verify"} Work Experience
+                    {isUnverifying ? "Unverify" : "Verify"} Certification
                 </h3>
             </div>
             <div class="p-6">
                 <div class="mb-4">
                     <p class="font-semibold text-gray-800">
-                        {experienceToVerify.company}
-                    </p>
-
-                    <p class="text-sm text-gray-600">
-                        {experienceToVerify.title}
+                        {certificationToVerify.certification_name}
                     </p>
                     <p class="text-sm text-gray-600">
-                        {experienceToVerify.start_date} - {experienceToVerify.end_date ??
-                            "Present"}
+                        {certificationToVerify.certifier}
                     </p>
                 </div>
 
@@ -471,7 +434,7 @@
                                     ? "bg-red-600 hover:bg-red-700"
                                     : "bg-black hover:bg-gray-800"
                             } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center disabled:opacity-75`}
-                            onclick={handleVerifyExperience}
+                            onclick={handleVerifyCertification}
                             disabled={verificationLoading}
                         >
                             {#if verificationLoading}
@@ -480,9 +443,9 @@
                                     ? "Unverifying..."
                                     : "Verifying..."}
                             {:else if isUnverifying}
-                                <X class="h-4 w-4 mr-2" /> Unverify Experience
+                                <X class="h-4 w-4 mr-2" /> Unverify Certification
                             {:else}
-                                <CheckCircle class="h-4 w-4 mr-2" /> Verify Experience
+                                <CheckCircle class="h-4 w-4 mr-2" /> Verify Certification
                             {/if}
                         </button>
                     </div>

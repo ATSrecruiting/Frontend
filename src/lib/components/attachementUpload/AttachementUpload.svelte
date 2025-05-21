@@ -14,15 +14,28 @@
         WorkExperience,
         Education,
         Certification,
+        PersonalGrowth,
+        SuccessStory,
     } from "$lib/types/uploadResume";
     import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
 
-    type Category = "workExperience" | "education" | "certification" | "";
+    type Category =
+        | "workExperience"
+        | "education"
+        | "certification"
+        | "personalGrowth"
+        | "successStories"
+        | "";
 
     interface DisplayItem {
         id: number;
         name: string;
-        data: WorkExperience | Education | Certification;
+        data:
+            | WorkExperience
+            | Education
+            | Certification
+            | PersonalGrowth
+            | SuccessStory;
     }
 
     let { cvData, userId } = $props<{
@@ -70,6 +83,22 @@
                         data: cert,
                     }),
                 );
+            case "personalGrowth":
+                return cvData.cv_data.personal_growth.map(
+                    (pg: PersonalGrowth, index: number) => ({
+                        id: index,
+                        name: ` ${pg.description}`,
+                        data: pg,
+                    }),
+                );
+            case "successStories":
+                return cvData.cv_data.success_stories.map(
+                    (ss: SuccessStory, index: number) => ({
+                        id: index,
+                        name: `${ss.headline}`,
+                        data: ss,
+                    }),
+                );
             default:
                 return [];
         }
@@ -83,6 +112,10 @@
                 return "Education";
             case "certification":
                 return "Certification";
+            case "personalGrowth":
+                return "Personal Growth";
+            case "successStories":
+                return "Success Stories";
             default:
                 return "";
         }
@@ -157,6 +190,18 @@
                                 itemIndex
                             ].attachment_ids = attachmentIds;
                         }
+                    case "personalGrowth":
+                        if (cvData.cv_data.personal_growth[itemIndex]) {
+                            cvData.cv_data.personal_growth[
+                                itemIndex
+                            ].attachment_ids = attachmentIds;
+                        }
+                    case "successStories":
+                        if (cvData.cv_data.success_stories[itemIndex]) {
+                            cvData.cv_data.success_stories[
+                                itemIndex
+                            ].attachment_ids = attachmentIds;
+                        }
                         break;
                 }
             }
@@ -227,6 +272,10 @@
                 return !!cvData.cv_data.education[index]?.attachment_id;
             case "certification":
                 return !!cvData.cv_data.certifications[index]?.attachment_id;
+            case "personalGrowth":
+                return !!cvData.cv_data.personal_growth[index]?.attachment_id;
+            case "successStories":
+                return !!cvData.cv_data.success_stories[index]?.attachment_id;
             default:
                 return false;
         }
@@ -272,6 +321,8 @@
                         <option value="workExperience">Work Experience</option>
                         <option value="education">Education</option>
                         <option value="certification">Certification</option>
+                        <option value="personalGrowth">Personal Growth</option>
+                        <option value="successStories">Success Stories</option>
                     </select>
                 </div>
 

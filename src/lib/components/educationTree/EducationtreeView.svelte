@@ -6,7 +6,6 @@
     } from "$lib/services/candidates";
     import {
         ChevronDown,
-        ChevronRight,
         Paperclip,
         CheckCircle,
         Shield,
@@ -164,161 +163,235 @@
 </script>
 
 <div class="mt-6 relative">
+    <!-- Updated header/dropdown button to match the create component -->
     <button
         type="button"
-        class="flex items-center mb-4 w-full text-left"
+        class="flex items-center mb-4 w-full text-left group focus:outline-none"
         onclick={toggleExpanded}
         onkeydown={(e) => e.key === "Enter" && toggleExpanded()}
         aria-expanded={isExpanded}
     >
-        <div class="rounded-full bg-red-600 py-2 px-4 flex items-center z-10">
-            {#if isExpanded}
-                <ChevronDown class="h-4 w-4 text-white mr-2" />
-            {:else}
-                <ChevronRight class="h-4 w-4 text-white mr-2" />
-            {/if}
-            <h2 class="text-xl font-bold text-white">Education</h2>
+        <div
+            class="w-full flex items-center justify-between border-b-2 border-black pb-2 transition-all duration-200"
+        >
+            <div class="flex items-center">
+                <h2 class="text-xl font-bold text-black mr-2">Education</h2>
+            </div>
+            <div
+                class="transform transition-transform duration-200 {isExpanded
+                    ? 'rotate-180'
+                    : ''}"
+            >
+                <ChevronDown class="h-5 w-5 text-black" />
+            </div>
         </div>
     </button>
 
     {#if isExpanded}
-    <div class="flow-root ml-3">
-        {#if isLoading}
-        <div class="flex justify-center items-center py-10 text-gray-500">
-            <Loader class="h-6 w-6 mr-2 animate-spin" /> Loading Education...
-        </div>
-        {:else if fetchError}
-        <div
-            class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
-        >
-            Error loading data: {fetchError}
-        </div>
-        {:else if education && education.length > 0}
-            <ul class="divide-y divide-gray-200">
-                {#each education as educ (educ.id)}
-                    {@const userVerified = isVerifiedByCurrentUser(educ)}
-                    <li class="relative border-l border-gray-200 py-4 pl-8">
-                        <span class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-red-600"></span>
+        <div class="flow-root">
+            {#if isLoading}
+                <div
+                    class="flex justify-center items-center py-10 text-gray-500"
+                >
+                    <Loader class="h-6 w-6 mr-2 animate-spin" /> Loading Education...
+                </div>
+            {:else if fetchError}
+                <div
+                    class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+                >
+                    Error loading data: {fetchError}
+                </div>
+            {:else if education && education.length > 0}
+                <ul class="divide-y divide-gray-100">
+                    {#each education as educ (educ.id)}
+                        {@const userVerified = isVerifiedByCurrentUser(educ)}
+                        <li
+                            class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200"
+                        >
+                            <!-- Updated black dot instead of red -->
+                            <span
+                                class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black"
+                            ></span>
 
-                        <div class="space-y-1">
-                            <div class="flex justify-between">
-                                <div>
-                                    <p class="text-lg font-semibold">{educ.school}</p>
-                                    <p class="text-base text-gray-500">{educ.degree}</p>
-                                    <p class="text-base text-gray-500">{educ.major}</p>
-                                </div>
-                                <div class="flex flex-col items-end space-y-1">
-                                    <p class="text-sm text-gray-500 whitespace-nowrap">
-                                        {educ.graduation_date ?? "In Progress"}
-                                    </p>
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-lg font-semibold">
+                                            {educ.school}
+                                        </p>
+                                        <p class="text-base text-gray-700">
+                                            {educ.degree}
+                                        </p>
+                                        <p class="text-base text-gray-700">
+                                            {educ.major}
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="flex flex-col items-end space-y-1"
+                                    >
+                                        <p
+                                            class="text-sm text-gray-500 whitespace-nowrap"
+                                        >
+                                            {educ.graduation_date ??
+                                                "In Progress"}
+                                        </p>
 
-                                    {#if educ.verifications && educ.verifications.length > 0}
-                                        {@const count = educ.verifications.length}
-                                        <div class="flex items-center text-green-600 text-xs font-medium relative">
-                                            <CheckCircle class="h-4 w-4 mr-1 flex-shrink-0" />
-                                            <span>Verified</span>
-                                            {#if count === 1}
-                                                <span class="text-gray-500 ml-1">
-                                                    by {educ.verifications[0].recruiter_name ?? "Unknown"}
-                                                </span>
-                                            {:else if count > 1}
-                                                <button
-                                                    type="button"
-                                                    class="flex items-center text-gray-500 ml-1 hover:text-blue-600 transition-colors"
-                                                    onclick={() => toggleVerifiers(educ.id)}
-                                                    aria-label="Show verifiers"
-                                                >
-                                                    by {count} recruiters
-                                                    <Info class="h-3 w-3 ml-1" />
-                                                </button>
-                                                {#if visibleVerifiers[educ.id]}
-                                                    <div class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs">
-                                                        <p class="font-semibold mb-1 border-b pb-1">
-                                                            Verified By:
-                                                        </p>
-                                                        <ul class="space-y-1 max-h-40 overflow-y-auto">
-                                                            {#each educ.verifications as verification}
-                                                                <li>
-                                                                    <span class="font-medium">
-                                                                        {verification.recruiter_name ?? "Unknown"}
-                                                                    </span>
-                                                                    <span class="text-gray-500 block text-[11px]">
-                                                                        {formatVerificationDate(verification.verified_at)}
-                                                                    </span>
-                                                                </li>
-                                                            {/each}
-                                                        </ul>
-                                                    </div>
+                                        {#if educ.verifications && educ.verifications.length > 0}
+                                            {@const count =
+                                                educ.verifications.length}
+                                            <div
+                                                class="flex items-center text-green-600 text-xs font-medium relative"
+                                            >
+                                                <CheckCircle
+                                                    class="h-4 w-4 mr-1 flex-shrink-0"
+                                                />
+                                                <span>Verified</span>
+                                                {#if count === 1}
+                                                    <span
+                                                        class="text-gray-500 ml-1"
+                                                    >
+                                                        by {educ
+                                                            .verifications[0]
+                                                            .recruiter_name ??
+                                                            "Unknown"}
+                                                    </span>
+                                                {:else if count > 1}
+                                                    <button
+                                                        type="button"
+                                                        class="flex items-center text-gray-500 ml-1 hover:text-black transition-colors"
+                                                        onclick={() =>
+                                                            toggleVerifiers(
+                                                                educ.id,
+                                                            )}
+                                                        aria-label="Show verifiers"
+                                                    >
+                                                        by {count} recruiters
+                                                        <Info
+                                                            class="h-3 w-3 ml-1"
+                                                        />
+                                                    </button>
+                                                    {#if visibleVerifiers[educ.id]}
+                                                        <div
+                                                            class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs"
+                                                        >
+                                                            <p
+                                                                class="font-semibold mb-1 border-b pb-1"
+                                                            >
+                                                                Verified By:
+                                                            </p>
+                                                            <ul
+                                                                class="space-y-1 max-h-40 overflow-y-auto"
+                                                            >
+                                                                {#each educ.verifications as verification}
+                                                                    <li>
+                                                                        <span
+                                                                            class="font-medium"
+                                                                        >
+                                                                            {verification.recruiter_name ??
+                                                                                "Unknown"}
+                                                                        </span>
+                                                                        <span
+                                                                            class="text-gray-500 block text-[11px]"
+                                                                        >
+                                                                            {formatVerificationDate(
+                                                                                verification.verified_at,
+                                                                            )}
+                                                                        </span>
+                                                                    </li>
+                                                                {/each}
+                                                            </ul>
+                                                        </div>
+                                                    {/if}
                                                 {/if}
-                                            {/if}
-                                        </div>
-                                    {:else}
-                                        <div class="flex items-center text-gray-500 text-xs font-medium">
-                                            <span class="text-red-500">Not verified</span>
-                                        </div>
-                                    {/if}
+                                            </div>
+                                        {:else}
+                                            <div
+                                                class="flex items-center text-gray-500 text-xs font-medium"
+                                            >
+                                                <span class="text-red-500"
+                                                    >Not verified</span
+                                                >
+                                            </div>
+                                        {/if}
 
-                                    <!-- Conditional button: Verify or Unverify -->
-                                    {#if userVerified}
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
-                                            onclick={() => openVerificationModal(educ, true)}
-                                            aria-label={`Unverify education at ${educ.school}`}
-                                        >
-                                            <X class="h-3 w-3 mr-1" />
-                                            Unverify
-                                        </button>
-                                    {:else}
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors mt-1"
-                                            onclick={() => openVerificationModal(educ, false)}
-                                            aria-label={`Verify education at ${educ.school}`}
-                                        >
-                                            <Shield class="h-3 w-3 mr-1" />
-                                            Verify
-                                        </button>
-                                    {/if}
+                                        <!-- Conditional button: Verify or Unverify -->
+                                        {#if userVerified}
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
+                                                onclick={() =>
+                                                    openVerificationModal(
+                                                        educ,
+                                                        true,
+                                                    )}
+                                                aria-label={`Unverify education at ${educ.school}`}
+                                            >
+                                                <X class="h-3 w-3 mr-1" />
+                                                Unverify
+                                            </button>
+                                        {:else}
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-black transition-colors mt-1"
+                                                onclick={() =>
+                                                    openVerificationModal(
+                                                        educ,
+                                                        false,
+                                                    )}
+                                                aria-label={`Verify education at ${educ.school}`}
+                                            >
+                                                <Shield class="h-3 w-3 mr-1" />
+                                                Verify
+                                            </button>
+                                        {/if}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {#if educ.attachments && educ.attachments.length > 0}
-                                <button
-                                    type="button"
-                                    class="mt-2 inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors text-sm"
-                                    onclick={() => openDocumentCarousel(educ.id)}
-                                >
-                                    <Paperclip class="h-4 w-4 mr-1" />
-                                    View Documents ({educ.attachments.length})
-                                </button>
-                            {/if}
-                        </div>
-                    </li>
-                {/each}
-            </ul>
-        {:else}
-            <div class="text-center py-6 text-gray-500">
-                No education added for this candidate yet.
-            </div>
-        {/if}
-    </div>
+                                {#if educ.attachments && educ.attachments.length > 0}
+                                    <button
+                                        type="button"
+                                        class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                                        onclick={() =>
+                                            openDocumentCarousel(educ.id)}
+                                    >
+                                        <Paperclip class="h-4 w-4 mr-1" />
+                                        View Documents ({educ.attachments
+                                            .length})
+                                    </button>
+                                {/if}
+                            </div>
+                        </li>
+                    {/each}
+                </ul>
+            {:else}
+                <div class="text-center py-6 text-gray-500">
+                    No education added for this candidate yet.
+                </div>
+            {/if}
+        </div>
     {/if}
 </div>
 
 {#if modalOpen}
     {@const currentEdu = getCurrentEducation()}
     {#if currentEdu}
-        <Carousel attachment_ids={currentEdu.attachments} onClose={closeModal} />
+        <Carousel
+            attachment_ids={currentEdu.attachments}
+            onClose={closeModal}
+        />
     {/if}
 {/if}
 
 {#if verificationModal && educationToVerify}
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+    <div
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+    >
+        <div
+            class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden"
+        >
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">
-                    {isUnverifying ? 'Unverify' : 'Verify'} Education
+                    {isUnverifying ? "Unverify" : "Verify"} Education
                 </h3>
             </div>
             <div class="p-6">
@@ -338,7 +411,9 @@
                 </div>
 
                 {#if verificationError}
-                    <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                    <div
+                        class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+                    >
                         {verificationError}
                     </div>
                 {/if}
@@ -365,20 +440,22 @@
                         <button
                             type="button"
                             class={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                                isUnverifying ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
-                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center disabled:opacity-75`}
+                                isUnverifying
+                                    ? "bg-red-600 hover:bg-red-700"
+                                    : "bg-black hover:bg-gray-800"
+                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center disabled:opacity-75`}
                             onclick={hanndleVerifyEducation}
                             disabled={verificationLoading}
                         >
                             {#if verificationLoading}
-                                <Loader class="h-4 w-4 mr-2 animate-spin" /> 
-                                {isUnverifying ? 'Unverifying...' : 'Verifying...'}
+                                <Loader class="h-4 w-4 mr-2 animate-spin" />
+                                {isUnverifying
+                                    ? "Unverifying..."
+                                    : "Verifying..."}
+                            {:else if isUnverifying}
+                                <X class="h-4 w-4 mr-2" /> Unverify Education
                             {:else}
-                                {#if isUnverifying}
-                                    <X class="h-4 w-4 mr-2" /> Unverify Education
-                                {:else}
-                                    <CheckCircle class="h-4 w-4 mr-2" /> Verify Education
-                                {/if}
+                                <CheckCircle class="h-4 w-4 mr-2" /> Verify Education
                             {/if}
                         </button>
                     </div>
