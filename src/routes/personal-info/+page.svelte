@@ -13,7 +13,7 @@
   import FileUploadComponent from "$lib/components/attachementUpload/AttachementUpload.svelte";
   import type { SubmitResumeApiRequest } from "$lib/types/submitResume";
   import WhoAmI from "$lib/components/whoAmI/WhoAmI.svelte";
-  import PersonalGrowth from "$lib/components/personalGrowth/personalGrowth.svelte";
+  import PersonalGrowth from "$lib/components/personalGrowth/personalGrowthTree.svelte";
   import SucessStories from "$lib/components/successStories/SucessStories.svelte";
 
   let data = $state<SubmitResumeApiRequest>({

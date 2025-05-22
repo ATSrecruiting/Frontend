@@ -77,6 +77,19 @@ export interface CertificationView {
     verifications: VerificationDetailResponse[];
 }
 
+export interface PersonalGrowthView {
+    id: string;
+    area_of_focus: string | null;
+    activity_method: string | null;
+    description: string | null;
+    timeframe: string | null;
+    skills_gained: string | null;
+    attachments: string[]; // Keep existing attachments structure
+
+    verifications: VerificationDetailResponse[];
+
+}
+
 
 interface Address {
     street: string;
@@ -129,6 +142,18 @@ export interface VerifyCertificationResponse {
 
 export interface UnVerifyCertificationResponse {
     certification_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+export interface VerifyPersonalGrowthResponse {
+    personal_growth_id: string;
+    recruiter_id: number; // ID of the recruiter who performed the verification
+    message: string; // Confirmation message from backend
+}
+
+export interface UnVerifyPersonalGrowthResponse {
+    personal_growth_id: string;
     recruiter_id: number; // ID of the recruiter who performed the verification
     message: string; // Confirmation message from backend
 }

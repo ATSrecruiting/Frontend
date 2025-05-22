@@ -31,9 +31,8 @@
     );
 </script>
 
-<div
-    class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-lg"
->
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full">
+    <!-- Header section with name and job title -->
     <div class="flex flex-col space-y-1.5 p-6">
         {#if isLoading}
             <Skeleton class="h-8 w-3/4 mb-2" />
@@ -63,8 +62,11 @@
             </p>
         {/if}
     </div>
-    <div class="p-6 pt-0 grid gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Info section with improved grid layout -->
+    <div class="p-6 pt-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Experience -->
             <div class="space-y-1">
                 <p
                     class="text-sm font-medium text-muted-foreground flex items-center gap-2"
@@ -98,6 +100,8 @@
                     </p>
                 {/if}
             </div>
+
+            <!-- Phone -->
             <div class="space-y-1">
                 <p
                     class="text-sm font-medium text-muted-foreground flex items-center gap-2"
@@ -127,6 +131,8 @@
                     <p>{candidatePersonalInfo?.phone_number}</p>
                 {/if}
             </div>
+
+            <!-- Email -->
             <div class="space-y-1">
                 <p
                     class="text-sm font-medium text-muted-foreground flex items-center gap-2"
@@ -154,11 +160,14 @@
                 {:else}
                     <a
                         href="mailto:{candidatePersonalInfo?.email}"
-                        class="text-primary hover:underline"
+                        class="text-primary hover:underline truncate block"
+                        title={candidatePersonalInfo?.email}
                         >{candidatePersonalInfo?.email}</a
                     >
                 {/if}
             </div>
+
+            <!-- Country -->
             <div class="space-y-1">
                 <p
                     class="text-sm font-medium text-muted-foreground flex items-center gap-2"
@@ -191,7 +200,9 @@
                 {/if}
             </div>
         </div>
-        <div class="space-y-1">
+
+        <!-- Address section in full width -->
+        <div class="space-y-1 mt-6">
             <p
                 class="text-sm font-medium text-muted-foreground flex items-center gap-2"
             >
