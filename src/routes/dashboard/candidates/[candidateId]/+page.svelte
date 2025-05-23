@@ -6,6 +6,8 @@
     import EducationtreeView from "$lib/components/educationTree/EducationtreeView.svelte";
     import CertificationTreeView from "$lib/components/certificationTree/CertificationTreeView.svelte";
     import PersonalGrowthTreeView from "$lib/components/personalGrowth/PersonalGrowthTreeView.svelte";
+  import WhoAmIView from "$lib/components/whoAmI/WhoAmIView.svelte";
+  import SucessStoriesView from "$lib/components/successStories/SucessStoriesView.svelte";
 
     let candidateId = page.params.candidateId;
     // Example candidate data
@@ -18,4 +20,6 @@
     <EducationtreeView {candidateId} />
     <CertificationTreeView {candidateId} />
     <PersonalGrowthTreeView {candidateId} />
+    <WhoAmIView {candidateId} />
+    <SucessStoriesView {candidateId} />
 </div>

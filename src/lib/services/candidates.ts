@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -237,6 +237,60 @@ export async function getCandidatePersonalGrowth(
     return response.json(); // Return data matching WorkExperienceView[]
 }
 
+export async function getCandidateSuccessStories(
+    candidateId: string,
+): Promise<SuccessStoryView[]> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_stories`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateSuccessStories(candidateId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Consider more specific error handling based on status codes if needed
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience");
+    }
+
+    return response.json(); // Return data matching WorkExperienceView[]
+}
+
+
+export async function getCandidateWhoAmI(
+    candidateId: string,
+): Promise<WhoAmIView> {
+const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/who_am_i`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateWhoAmI(candidateId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Consider more specific error handling based on status codes if needed
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience");
+    }
+
+    return response.json(); // Return data matching WorkExperienceView[]
+}
 
 
 
@@ -500,6 +554,73 @@ export async function unverifyPersonalGrowth(
             const refreshed = await authService.refreshToken();
             if (refreshed) {
                 return unverifyPersonalGrowth(candidateId, personalGrowthId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Handle potential conflict (e.g., 409 if already verified by this user, though backend might just return success)
+        // Handle other errors
+        const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+        console.error(`API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json();
+}
+
+
+export async function verifySuccessStory(
+    candidateId: string,
+    successStoryId: string,
+): Promise<VerifyWorkExperienceResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_story/${successStoryId}/verify`,
+        {
+            method: "PUT",
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return verifySuccessStory(candidateId, successStoryId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Handle potential conflict (e.g., 409 if already verified by this user, though backend might just return success)
+        // Handle other errors
+        const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
+        console.error(`API Error ${response.status}:`, errorBody);
+        throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json();
+}
+
+export async function unverifySuccessStory(
+    candidateId: string,
+    successStoryId: string,
+): Promise<UnVerifyPersonalGrowthResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_story/${successStoryId}/unverify`,
+        {
+            method: "PUT",
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return unverifySuccessStory(candidateId, successStoryId); // Retry
             } else {
                 goto("/login"); // Redirect to login if refresh fails
                 throw new Error("Authentication expired. Please login again.");

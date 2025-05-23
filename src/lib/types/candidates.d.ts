@@ -91,6 +91,31 @@ export interface PersonalGrowthView {
 }
 
 
+export interface WhoAmIView {
+    id: string;
+    personal_statement: string | null;
+    core_values: string[] | null;
+    working_style: string[] | null;
+    motivators: string[] | null;
+    interests_passions: string[] | null;
+    attachments: string[]; // Keep existing attachments structure
+}
+
+export interface SuccessStoryView {
+    id: string;
+    headline: string | null;
+    situation: string | null;
+    actions: string | null;
+    results: string | null;
+    skills: string[] | null;
+    relevant_experience: string;
+    timeframe: string;
+    attachments: string[]; // Keep existing attachments structure
+
+    verifications: VerificationDetailResponse[];
+}
+
+
 interface Address {
     street: string;
     country: string;
