@@ -16,7 +16,7 @@
         VerificationDetailResponse,
     } from "$lib/types/candidates";
     import {
-        getCandidateWorkExperience,
+        listCandidateWorkExperience,
         verifyWorkExperience,
         unverifyWorkExperience,
     } from "$lib/services/candidates";
@@ -54,7 +54,7 @@
         isLoading = true;
         fetchError = null;
         try {
-            const data = await getCandidateWorkExperience(id);
+            const data = await listCandidateWorkExperience(id);
             work_exp = data;
         } catch (error) {
             console.error("Failed to load work experience:", error);
@@ -194,7 +194,7 @@
     // Add this function to handle navigation
     function navigateToExperienceDetails(workExp: WorkExperienceView) {
         // Navigate to the experience details page
-        goto(`/candidates/${candidateId}/experience/${workExp.id}`);
+        goto(`/dashboard/candidates/${candidateId}/work_experience/${workExp.id}`);
     }
 </script>
 

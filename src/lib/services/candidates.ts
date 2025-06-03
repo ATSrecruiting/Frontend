@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -128,7 +128,7 @@ export async function getCandidatePersonalInfo(candidateId: string): Promise<Can
 }
 
 // Fetch work experience - return type updated
-export async function getCandidateWorkExperience(
+export async function listCandidateWorkExperience(
     candidateId: string,
 ): Promise<WorkExperienceView[]> {
     const headers = await authService.getAuthHeaders();
@@ -141,7 +141,7 @@ export async function getCandidateWorkExperience(
         if (response.status === 401) {
             const refreshed = await authService.refreshToken();
             if (refreshed) {
-                return getCandidateWorkExperience(candidateId); // Retry
+                return listCandidateWorkExperience(candidateId); // Retry
             } else {
                 goto("/login"); // Redirect to login if refresh fails
                 throw new Error("Authentication expired. Please login again.");
@@ -631,6 +631,96 @@ export async function unverifySuccessStory(
         const errorBody = await response.json().catch(() => ({ detail: 'Failed to parse error response' }));
         console.error(`API Error ${response.status}:`, errorBody);
         throw new Error(errorBody.detail || "Failed to verify work experience");
+    }
+
+    return response.json();
+}
+
+
+
+
+export async function getWorkExperienceVerifications(
+    candidateId: string,
+    workExperienceId: string,
+): Promise<VerificationDetailResponse[]> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verifications`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getWorkExperienceVerifications(candidateId, workExperienceId); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch work experience verifications");
+    }
+
+    return response.json();
+}
+
+
+export async function getCandidateWorkExperience(
+    candidateId: string,
+    workExperienceId: string,
+): Promise<GetCandidateWorkExperienceResponse> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateWorkExperience(candidateId,workExperienceId ); // Retry
+            } else {
+                goto("/login"); // Redirect to login if refresh fails
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+        // Consider more specific error handling based on status codes if needed
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience");
+    }
+
+    return response.json(); // Return data matching WorkExperienceView[]
+}
+
+
+
+
+export async function getCandidateWorkExperienceProjects(
+    candidateId: string,
+    workExperienceId: string,
+): Promise<ListCandidateWorkExperienceProjectsResponse[]> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/projects`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateWorkExperienceProjects(candidateId,workExperienceId );
+            } else {
+                goto("/login");
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+    
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience");
     }
 
     return response.json();

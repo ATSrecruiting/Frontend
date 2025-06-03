@@ -182,3 +182,30 @@ export interface UnVerifyPersonalGrowthResponse {
     recruiter_id: number; // ID of the recruiter who performed the verification
     message: string; // Confirmation message from backend
 }
+
+
+
+export interface GetCandidateWorkExperienceResponse {
+    id: string; // Assuming ID is string (UUID)
+    title: string | null;
+    company: string | null;
+    start_date: string | null; // ISO date string
+    end_date: string | null; // ISO date string
+    location: string | null;
+    employment_type: string | null; // e.g., Full-time, Part-time, Contract
+    skills: string[] | null; // Skills related to this work experience
+    key_achievements: string[] | null; // Achievements in this role
+    description: string | null; // Description of the role
+
+
+}
+
+export interface ListCandidateWorkExperienceProjectsResponse {
+    id : string; // Assuming ID is string (UUID)
+    work_experience_id: string; // ID of the work experience this project belongs to
+    project_name: string | null;
+    description: string | null;
+    duration: string | null; // e.g., "3 months", "6 weeks"
+    team_size: number | null; // Number of people in the team
+    impact: string | null; // Description of the impact made in the project
+}
