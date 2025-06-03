@@ -22,6 +22,7 @@
     } from "$lib/services/candidates";
     import Carousel from "$lib/components/carousel/Carousel.svelte";
     import { userStore } from "$lib/stores/userStore";
+    import { goto } from "$app/navigation";
 
     // Props
     let { candidateId } = $props<string>();
@@ -189,6 +190,12 @@
             return "Invalid date";
         }
     }
+
+    // Add this function to handle navigation
+    function navigateToExperienceDetails(workExp: WorkExperienceView) {
+        // Navigate to the experience details page
+        goto(`/candidates/${candidateId}/experience/${workExp.id}`);
+    }
 </script>
 
 <div class="mt-6 relative">
@@ -236,157 +243,204 @@
                     {#each work_exp as workExp (workExp.id)}
                         {@const userVerified = isVerifiedByCurrentUser(workExp)}
                         <li
-                            class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200"
+                            class="relative border-l-2 border-gray-200 hover:border-black transition-colors duration-200"
                         >
-                            <span
-                                class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black"
-                            ></span>
+                            <div
+                                role="button"
+                                tabindex="0"
+                                class="w-full text-left py-4 pl-6 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-inset"
+                                onclick={(e) => {
+                                    // Only navigate if clicking on the main content, not nested buttons
+                                    const target = e.target as HTMLElement;
+                                    if (
+                                        target.closest('[role="button"]') !==
+                                        e.currentTarget
+                                    ) {
+                                        return;
+                                    }
+                                    navigateToExperienceDetails(workExp);
+                                }}
+                                onkeypress={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        navigateToExperienceDetails(workExp);
+                                    }
+                                }}
+                                aria-label={`View details for ${workExp.title} at ${workExp.company}`}
+                            >
+                                <span
+                                    class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black group-hover:bg-gray-700 transition-colors"
+                                ></span>
 
-                            <div class="space-y-1">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-lg font-semibold">
-                                            {workExp.company}
-                                        </p>
-                                        <p class="text-base text-gray-700">
-                                            {workExp.location}
-                                        </p>
-                                        <p class="text-base text-gray-700">
-                                            {workExp.title}
-                                        </p>
-                                    </div>
+                                <div
+                                    class="space-y-1 group-hover:bg-gray-50 -m-2 p-2 rounded-md transition-colors"
+                                >
                                     <div
-                                        class="flex flex-col items-end space-y-1"
+                                        class="flex justify-between items-center"
                                     >
-                                        <p
-                                            class="text-sm text-gray-500 whitespace-nowrap"
+                                        <div class="flex-1 min-w-0">
+                                            <p
+                                                class="text-lg font-semibold group-hover:text-gray-900 transition-colors"
+                                            >
+                                                {workExp.company}
+                                            </p>
+                                            <p
+                                                class="text-base text-gray-700 group-hover:text-gray-800 transition-colors"
+                                            >
+                                                {workExp.location}
+                                            </p>
+                                            <p
+                                                class="text-base text-gray-700 group-hover:text-gray-800 transition-colors"
+                                            >
+                                                {workExp.title}
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="flex flex-col items-end space-y-1"
                                         >
-                                            {workExp.start_date} - {workExp.end_date ??
-                                                "Present"}
-                                        </p>
+                                            <p
+                                                class="text-sm text-gray-500 whitespace-nowrap"
+                                            >
+                                                {workExp.start_date} - {workExp.end_date ??
+                                                    "Present"}
+                                            </p>
 
-                                        {#if workExp.verifications && workExp.verifications.length > 0}
-                                            {@const count =
-                                                workExp.verifications.length}
-                                            <div
-                                                class="flex items-center text-green-600 text-xs font-medium relative"
-                                            >
-                                                <CheckCircle
-                                                    class="h-4 w-4 mr-1 flex-shrink-0"
-                                                />
-                                                <span>Verified</span>
-                                                {#if count === 1}
-                                                    <span
-                                                        class="text-gray-500 ml-1"
-                                                    >
-                                                        by {workExp
-                                                            .verifications[0]
-                                                            .recruiter_name ??
-                                                            "Unknown"}
-                                                    </span>
-                                                {:else if count > 1}
-                                                    <button
-                                                        type="button"
-                                                        class="flex items-center text-gray-500 ml-1 hover:text-black transition-colors"
-                                                        onclick={() =>
-                                                            toggleVerifiers(
-                                                                workExp.id,
-                                                            )}
-                                                        aria-label="Show verifiers"
-                                                    >
-                                                        by {count} recruiters
-                                                        <Info
-                                                            class="h-3 w-3 ml-1"
-                                                        />
-                                                    </button>
-                                                    {#if visibleVerifiers[workExp.id]}
-                                                        <div
-                                                            class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs"
-                                                        >
-                                                            <p
-                                                                class="font-semibold mb-1 border-b pb-1"
-                                                            >
-                                                                Verified By:
-                                                            </p>
-                                                            <ul
-                                                                class="space-y-1 max-h-40 overflow-y-auto"
-                                                            >
-                                                                {#each workExp.verifications as verification}
-                                                                    <li>
-                                                                        <span
-                                                                            class="font-medium"
-                                                                            >{verification.recruiter_name ??
-                                                                                "Unknown"}</span
-                                                                        >
-                                                                        <span
-                                                                            class="text-gray-500 block text-[11px]"
-                                                                        >
-                                                                            {formatVerificationDate(
-                                                                                verification.verified_at,
-                                                                            )}
-                                                                        </span>
-                                                                    </li>
-                                                                {/each}
-                                                            </ul>
-                                                        </div>
-                                                    {/if}
-                                                {/if}
-                                            </div>
-                                        {:else}
-                                            <div
-                                                class="flex items-center text-gray-500 text-xs font-medium"
-                                            >
-                                                <span class="text-red-500"
-                                                    >Not verified</span
+                                            {#if workExp.verifications && workExp.verifications.length > 0}
+                                                {@const count =
+                                                    workExp.verifications
+                                                        .length}
+                                                <div
+                                                    class="flex items-center text-green-600 text-xs font-medium relative"
                                                 >
-                                            </div>
-                                        {/if}
+                                                    <CheckCircle
+                                                        class="h-4 w-4 mr-1 flex-shrink-0"
+                                                    />
+                                                    <span>Verified</span>
+                                                    {#if count === 1}
+                                                        <span
+                                                            class="text-gray-500 ml-1"
+                                                        >
+                                                            by {workExp
+                                                                .verifications[0]
+                                                                .recruiter_name ??
+                                                                "Unknown"}
+                                                        </span>
+                                                    {:else if count > 1}
+                                                        <button
+                                                            type="button"
+                                                            class="flex items-center text-gray-500 ml-1 hover:text-black transition-colors"
+                                                            onclick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleVerifiers(
+                                                                    workExp.id,
+                                                                );
+                                                            }}
+                                                            aria-label="Show verifiers"
+                                                        >
+                                                            by {count} recruiters
+                                                            <Info
+                                                                class="h-3 w-3 ml-1"
+                                                            />
+                                                        </button>
+                                                        {#if visibleVerifiers[workExp.id]}
+                                                            <div
+                                                                class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs"
+                                                            >
+                                                                <p
+                                                                    class="font-semibold mb-1 border-b pb-1"
+                                                                >
+                                                                    Verified By:
+                                                                </p>
+                                                                <ul
+                                                                    class="space-y-1 max-h-40 overflow-y-auto"
+                                                                >
+                                                                    {#each workExp.verifications as verification}
+                                                                        <li>
+                                                                            <span
+                                                                                class="font-medium"
+                                                                            >
+                                                                                {verification.recruiter_name ??
+                                                                                    "Unknown"}
+                                                                            </span>
+                                                                            <span
+                                                                                class="text-gray-500 block text-[11px]"
+                                                                            >
+                                                                                {formatVerificationDate(
+                                                                                    verification.verified_at,
+                                                                                )}
+                                                                            </span>
+                                                                        </li>
+                                                                    {/each}
+                                                                </ul>
+                                                            </div>
+                                                        {/if}
+                                                    {/if}
+                                                </div>
+                                            {:else}
+                                                <div
+                                                    class="flex items-center text-gray-500 text-xs font-medium"
+                                                >
+                                                    <span class="text-red-500"
+                                                        >Not verified</span
+                                                    >
+                                                </div>
+                                            {/if}
 
-                                        <!-- Conditional button: Verify or Unverify -->
-                                        {#if userVerified}
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
-                                                onclick={() =>
-                                                    openVerificationModal(
-                                                        workExp,
-                                                        true,
-                                                    )}
-                                                aria-label={`Unverify experience at ${workExp.company}`}
-                                            >
-                                                <X class="h-3 w-3 mr-1" />
-                                                Unverify
-                                            </button>
-                                        {:else}
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-black transition-colors mt-1"
-                                                onclick={() =>
-                                                    openVerificationModal(
-                                                        workExp,
-                                                        false,
-                                                    )}
-                                                aria-label={`Verify experience at ${workExp.company}`}
-                                            >
-                                                <Shield class="h-3 w-3 mr-1" />
-                                                Verify
-                                            </button>
-                                        {/if}
+                                            <!-- Conditional button: Verify or Unverify -->
+                                            {#if userVerified}
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
+                                                    onclick={(e) => {
+                                                        e.stopPropagation();
+                                                        openVerificationModal(
+                                                            workExp,
+                                                            true,
+                                                        );
+                                                    }}
+                                                    aria-label={`Unverify experience at ${workExp.company}`}
+                                                >
+                                                    <X class="h-3 w-3 mr-1" />
+                                                    Unverify
+                                                </button>
+                                            {:else}
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-black transition-colors mt-1"
+                                                    onclick={(e) => {
+                                                        e.stopPropagation();
+                                                        openVerificationModal(
+                                                            workExp,
+                                                            false,
+                                                        );
+                                                    }}
+                                                    aria-label={`Verify experience at ${workExp.company}`}
+                                                >
+                                                    <Shield
+                                                        class="h-3 w-3 mr-1"
+                                                    />
+                                                    Verify
+                                                </button>
+                                            {/if}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {#if workExp.attachments && workExp.attachments.length > 0}
-                                    <button
-                                        type="button"
-                                        class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
-                                        onclick={() =>
-                                            openDocumentCarousel(workExp.id)}
-                                    >
-                                        <Paperclip class="h-4 w-4 mr-1" />
-                                        View Documents ({workExp.attachments
-                                            .length})
-                                    </button>
-                                {/if}
+                                    {#if workExp.attachments && workExp.attachments.length > 0}
+                                        <button
+                                            type="button"
+                                            class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                                            onclick={(e) => {
+                                                e.stopPropagation();
+                                                openDocumentCarousel(
+                                                    workExp.id,
+                                                );
+                                            }}
+                                        >
+                                            <Paperclip class="h-4 w-4 mr-1" />
+                                            View Documents ({workExp.attachments
+                                                .length})
+                                        </button>
+                                    {/if}
+                                </div>
                             </div>
                         </li>
                     {/each}
