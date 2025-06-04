@@ -7,7 +7,7 @@ import type {ListCandidateWorkExperienceProjectsResponse} from '$lib/types/candi
 <div class="p-6">
     <div class="flex items-start justify-between mb-3">
         <h3 class="text-lg font-semibold text-gray-900">
-            {project.name}
+            {project.project_name}
         </h3>
         <div class="text-sm text-gray-500 text-right">
             <div>{project.duration}</div>

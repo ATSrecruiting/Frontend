@@ -1,6 +1,6 @@
 <script lang="ts">
     import { ChevronDown } from "lucide-svelte";
-    import type { Component } from "svelte";
+    import type { ComponentType } from "svelte";
 
     let { 
         title, 
@@ -9,7 +9,7 @@
         children
     } = $props<{
         title: string;
-        icon?: Component;
+        icon?: ComponentType;
         initiallyExpanded?: boolean;
         children: any;
     }>();

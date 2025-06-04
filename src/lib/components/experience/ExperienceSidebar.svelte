@@ -1,17 +1,12 @@
 <script lang="ts">
     import DocumentsSection from './sections/DocumentsSection.svelte';
     import VerificationsSection from './sections/VerificationsSection.svelte';
-       import type { VerificationDetailResponse } from "$lib/types/candidates";
+       import type { VerificationDetailResponse, ListAttachmentsResponse as Attachments } from "$lib/types/candidates";
 
-    type Attachment = {
-        id: string;
-        name: string;
-        type: string;
-    };
 
 
     let { attachments, verifications, openDocumentCarousel } = $props<{
-        attachments: Attachment[];
+        attachments: Attachments[];
         verifications: VerificationDetailResponse[];
         openDocumentCarousel: () => void;
     }>();

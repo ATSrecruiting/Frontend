@@ -209,3 +209,11 @@ export interface ListCandidateWorkExperienceProjectsResponse {
     team_size: number | null; // Number of people in the team
     impact: string | null; // Description of the impact made in the project
 }
+
+
+
+export interface ListAttachmentsResponse {
+    uuid: string; // Unique identifier for the attachment
+    name: string; // Name of the attachment file
+    url: string; // URL to access the attachment file
+}

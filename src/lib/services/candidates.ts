@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse, ListAttachmentsResponse } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -645,7 +645,7 @@ export async function getWorkExperienceVerifications(
 ): Promise<VerificationDetailResponse[]> {
     const headers = await authService.getAuthHeaders();
     const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verifications`,
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verifiers`,
         { headers },
     );
 
@@ -721,6 +721,36 @@ export async function getCandidateWorkExperienceProjects(
     
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to fetch candidate work experience");
+    }
+
+    return response.json();
+}
+
+
+
+export async function getCandidateWorkExperienceAttachments(
+    candidateId: string,
+    workExperienceId: string,
+): Promise<ListAttachmentsResponse[]> {
+    const headers = await authService.getAuthHeaders();
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/attachments`,
+        { headers },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return getCandidateWorkExperienceAttachments(candidateId, workExperienceId);
+            } else {
+                goto("/login");
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+    
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to fetch candidate work experience attachments");
     }
 
     return response.json();

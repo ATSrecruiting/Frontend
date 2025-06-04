@@ -5,9 +5,11 @@
     import ExperienceSidebar from '$lib/components/experience/ExperienceSidebar.svelte';
     import Carousel from "$lib/components/carousel/Carousel.svelte";
     import {onMount} from "svelte";
-    import { getWorkExperienceVerifications,getCandidateWorkExperience  } from "$lib/services/candidates";
-    import type { VerificationDetailResponse, GetCandidateWorkExperienceResponse as Experience } from "$lib/types/candidates";
+
+    import { getWorkExperienceVerifications,getCandidateWorkExperience, getCandidateWorkExperienceAttachments  } from "$lib/services/candidates";
+    import type { VerificationDetailResponse, GetCandidateWorkExperienceResponse as Experience, ListAttachmentsResponse as Attachments  } from "$lib/types/candidates";
     import { page } from "$app/state";
+  import { on } from 'svelte/events';
 
     // Props
     let candidateId = page.params.candidateId;
@@ -32,7 +34,9 @@
     });
 
 
-    function GetWorkExpereinceDetails() {
+    let attachments = $state<Attachments[]>([])
+
+    function fetchWorkExpereinceDetails() {
         getCandidateWorkExperience(candidateId, workExperienceId)
             .then((data) => {
                 experience = data;
@@ -44,7 +48,7 @@
 
 
     onMount(() => {
-        GetWorkExpereinceDetails();
+        fetchWorkExpereinceDetails();
     });
 
 
@@ -60,6 +64,21 @@
     }
     onMount(() => {
         fetchVerifications();
+        
+    });
+
+    function fetchAttachments() {
+        getCandidateWorkExperienceAttachments(candidateId, workExperienceId)
+            .then((data) => {
+                attachments = data;
+            })
+            .catch((error) => {
+                console.error("Error fetching attachments:", error);
+            });
+    }
+
+    onMount(() => {
+        fetchAttachments();
     });
 
     // Component State
@@ -91,11 +110,11 @@
                 candidateId = {candidateId}
                 expId = {workExperienceId} />
             
-            <!-- <ExperienceSidebar 
-                attachments={experience.attachments}
+            <ExperienceSidebar 
+                attachments={attachments}
                 verifications={verifications}
                 {openDocumentCarousel}
-            /> -->
+            />
         </div>
     </div>
 </div>
