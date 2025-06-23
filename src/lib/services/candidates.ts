@@ -1,4 +1,4 @@
-import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse, ListAttachmentsResponse } from '$lib/types/candidates';
+import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse, ListAttachmentsResponse, UpdateWorkExperienceDescriptionResponse, UpdateWorkExperienceKeyAchievementsResponse, UpdateWorkExperienceProjectsResponse, UpdateWorkExperienceProjectsRequest } from '$lib/types/candidates';
 import { authService } from './auth';
 import { goto } from '$app/navigation';
 
@@ -751,6 +751,124 @@ export async function getCandidateWorkExperienceAttachments(
     
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to fetch candidate work experience attachments");
+    }
+
+    return response.json();
+}
+
+
+
+export async function updateWorkExperienceDescription(
+    candidateId: string,
+    workExperienceId: string,
+    description: string,
+): Promise<UpdateWorkExperienceDescriptionResponse> {
+    const headers = await authService.getAuthHeaders();
+    
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/description`,
+        {
+            method: 'PUT',
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ description }),
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return updateWorkExperienceDescription(candidateId, workExperienceId, description);
+            } else {
+                goto("/login");
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+    
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to update work experience description");
+    }
+
+    return response.json();
+}
+
+
+
+export async function updateWorkExperienceKeyAchievements(
+    candidateId: string,
+    workExperienceId: string,
+    key_achievements: string[],
+): Promise<UpdateWorkExperienceKeyAchievementsResponse> {
+    const headers = await authService.getAuthHeaders();
+    
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/key_achievements`,
+        {
+            method: 'PUT',
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ key_achievements }),
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return updateWorkExperienceKeyAchievements(candidateId, workExperienceId, key_achievements);
+            } else {
+                goto("/login");
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+    
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to update work experience description");
+    }
+
+    return response.json();
+}
+
+
+
+export async function updateWorkExperienceProjects(
+    candidateId: string,
+    workExperienceId: string,
+    projects: UpdateWorkExperienceProjectsRequest[],
+): Promise<UpdateWorkExperienceProjectsResponse> {
+    const headers = await authService.getAuthHeaders();
+
+    // If you want to send just a list (array) of projects, not wrapped in an object:
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/projects`,
+        {
+            method: 'PUT',
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(projects), // send as a plain array
+        },
+    );
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            const refreshed = await authService.refreshToken();
+            if (refreshed) {
+                return updateWorkExperienceProjects(candidateId, workExperienceId, projects);
+            } else {
+                goto("/login");
+                throw new Error("Authentication expired. Please login again.");
+            }
+        }
+
+        console.error(`API Error ${response.status}: ${await response.text()}`);
+        throw new Error("Failed to update work experience projects");
     }
 
     return response.json();

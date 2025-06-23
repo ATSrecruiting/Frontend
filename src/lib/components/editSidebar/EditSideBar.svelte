@@ -1,7 +1,8 @@
 <script lang="ts">
     import { X, Save, RotateCcw, Plus } from "lucide-svelte";
     import { slide, fade } from "svelte/transition";
-    import type { ListCandidateWorkExperienceProjectsResponse } from "$lib/types/candidates";
+    import type { ListCandidateWorkExperienceProjectsResponse, UpdateWorkExperienceProjectsRequest } from "$lib/types/candidates";
+  import { updateWorkExperienceDescription, updateWorkExperienceKeyAchievements, updateWorkExperienceProjects } from "$lib/services/candidates";
 
     let {
         isOpen = false,
@@ -11,14 +12,18 @@
         description = "",
         achievements = [],
         projectsData = [],
+        candidateId = "",
+        expId = "",
     } = $props<{
         isOpen: boolean;
         section: string;
         onClose: () => void;
-        onSave: () => void;
+        onSave: (data:any) => void;
         description?: string;
         achievements?: string[];
         projectsData?: ListCandidateWorkExperienceProjectsResponse[];
+        candidateId?: string;
+        expId?: string;
     }>();
 
     // Local state for managing description
@@ -138,16 +143,42 @@
         };
     }
 
-    function handleSave() {
+    async function handleSave() {
         if (section === "Description") {
             console.log("Saving description:", localDescription);
-            // TODO: Call your API here with localDescription
+        try {
+            const data = await updateWorkExperienceDescription(candidateId, expId, localDescription);
+            console.log("Description saved successfully");
+            onSave(data); // Call onSave with the updated description
+            
+
+        } catch (error) {
+            console.error("Error saving description:", error);
+        }
         } else if (section === "Achievements") {
             console.log("Saving achievements:", localAchievements);
+        try {
+            const data = await updateWorkExperienceKeyAchievements(candidateId, expId, localAchievements);
+            console.log("Achievements saved successfully");
+            onSave(data); // Call onSave with the updated achievements
+        } catch (error) {
+            console.error("Error saving achievements:", error);
+
+        }
             // TODO: Call your API here with localAchievements
         } else if (section === "Projects") {
             console.log("Saving projects:", localProjects);
-            // TODO: Call your API here with localProjects
+            const request : UpdateWorkExperienceProjectsRequest[] = localProjects.map((project) => ({
+                work_experience_id: expId,
+                project_name: project.project_name,
+                description: project.description || null,
+                duration: project.duration || null,
+                team_size: project.team_size || null,
+                impact: project.impact || null,
+            }));
+            const data = updateWorkExperienceProjects(candidateId, expId, request);
+            console.log("Projects saved successfully");
+            onSave(data); // Call onSave with the updated projects
         }
         onSave();
     }

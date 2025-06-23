@@ -217,3 +217,34 @@ export interface ListAttachmentsResponse {
     name: string; // Name of the attachment file
     url: string; // URL to access the attachment file
 }
+
+
+export interface UpdateWorkExperienceDescriptionResponse {
+    work_experience_id: string; // ID of the updated work experience
+    description: string; // Updated description of the work experience
+    message: string; // Confirmation message from backend
+}
+
+
+export interface UpdateWorkExperienceKeyAchievementsResponse {
+    work_experience_id: string; 
+    key_achievements: string[];
+    message: string;
+}
+
+
+export interface UpdateWorkExperienceProjectsRequest {
+        project_name?: string | null;
+        description?: string | null;
+        duration?: string | null;
+        team_size?: number | null;
+        impact?: string | null;
+}
+
+
+
+export interface UpdateWorkExperienceProjectsResponse {
+    work_experience_id: string; 
+    projects: ListCandidateWorkExperienceProjectsResponse[];
+    message: string;
+}

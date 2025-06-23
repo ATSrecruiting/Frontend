@@ -32,9 +32,14 @@
         currentEditSection = "";
     }
 
-    function saveEdit() {
-        // Will implement save logic later
-        console.log("Saving changes for:", currentEditSection);
+    function saveEdit(data: any) {
+        if (currentEditSection === "Description") {
+            description = data.description;
+        } else if (currentEditSection === "Achievements") {
+            key_achievements = data.achievements;
+        } else if (currentEditSection === "Projects") {
+            projectsData = data.projects;
+        }
         closeEdit();
     }
 </script>
@@ -62,6 +67,10 @@
     section={currentEditSection}
     onClose={closeEdit}
     onSave={saveEdit}
+    description={description}
     achievements={key_achievements}
     {projectsData}
+    candidateId={candidateId}
+    expId={expId}
+
 />
