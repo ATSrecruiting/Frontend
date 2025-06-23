@@ -63,4 +63,5 @@
     onClose={closeEdit}
     onSave={saveEdit}
     achievements={key_achievements}
+    {projectsData}
 />

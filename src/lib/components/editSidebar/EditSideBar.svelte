@@ -8,6 +8,7 @@
         section = "",
         onClose = () => {},
         onSave = () => {},
+        description = "",
         achievements = [],
         projectsData = [],
     } = $props<{
@@ -15,9 +16,13 @@
         section: string;
         onClose: () => void;
         onSave: () => void;
+        description?: string;
         achievements?: string[];
         projectsData?: ListCandidateWorkExperienceProjectsResponse[];
     }>();
+
+    // Local state for managing description
+    let localDescription = $state("");
 
     // Local state for managing achievements
     let localAchievements = $state<string[]>([]);
@@ -37,8 +42,11 @@
         impact: "",
     });
 
-    // Initialize local achievements when the component opens or achievements prop changes
+    // Initialize local state when the component opens or props change
     $effect(() => {
+        if (isOpen && section === "Description") {
+            localDescription = description;
+        }
         if (isOpen && section === "Achievements") {
             localAchievements = [...achievements];
         }
@@ -49,6 +57,9 @@
 
     // Also initialize when props change while already open
     $effect(() => {
+        if (section === "Description") {
+            localDescription = description;
+        }
         if (section === "Achievements") {
             localAchievements = [...achievements];
         }
@@ -128,7 +139,10 @@
     }
 
     function handleSave() {
-        if (section === "Achievements") {
+        if (section === "Description") {
+            console.log("Saving description:", localDescription);
+            // TODO: Call your API here with localDescription
+        } else if (section === "Achievements") {
             console.log("Saving achievements:", localAchievements);
             // TODO: Call your API here with localAchievements
         } else if (section === "Projects") {
@@ -140,7 +154,9 @@
 
     function handleCancel() {
         // Reset local state to original data
-        if (section === "Achievements") {
+        if (section === "Description") {
+            localDescription = description;
+        } else if (section === "Achievements") {
             localAchievements = [...achievements];
             newAchievement = "";
         } else if (section === "Projects") {
@@ -200,9 +216,15 @@
                         </label>
                         <textarea
                             id="job-description"
+                            bind:value={localDescription}
                             class="w-full h-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             placeholder="Describe the role and responsibilities..."
                         ></textarea>
+
+                        <!-- Character count helper -->
+                        <p class="text-xs text-gray-500 text-right">
+                            {localDescription.length} characters
+                        </p>
                     </div>
                 {:else if section === "Achievements"}
                     <div class="space-y-4">
@@ -297,9 +319,9 @@
                     </div>
                 {:else if section === "Projects"}
                     <div class="space-y-6">
-                        <label class="block text-sm font-medium text-gray-700">
+                        <h3 class="block text-sm font-medium text-gray-700">
                             Projects
-                        </label>
+                        </h3>
 
                         <!-- Existing projects list -->
                         <div class="space-y-4">
@@ -367,11 +389,13 @@
                                                 </div>
                                                 <div>
                                                     <label
+                                                        for="team-size-{index}"
                                                         class="block text-xs font-medium text-gray-600 mb-1"
                                                     >
                                                         Team Size
                                                     </label>
                                                     <input
+                                                        id="team-size-{index}"
                                                         type="number"
                                                         bind:value={
                                                             localProjects[index]
