@@ -11,7 +11,7 @@
     }>();
 
     function goBack() {
-        goto(`/candidates/${candidateId}`);
+        goto(`/dashboard/candidates/${candidateId}`)
     }
 </script>
 
