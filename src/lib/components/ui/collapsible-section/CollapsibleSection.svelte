@@ -1,4 +1,5 @@
 <script lang="ts">
+    import RoleGuard from "$lib/components/roles/RoleGuard.svelte";
     import { ChevronDown, Edit3 } from "lucide-svelte";
     import type { ComponentType } from "svelte";
 
@@ -47,14 +48,16 @@
         </button>
 
         <div class="flex items-center space-x-2">
-            <button
-                type="button"
-                onclick={handleEdit}
-                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-md transition-colors"
-            >
-                <Edit3 class="h-3.5 w-3.5 mr-1" />
-                Edit
-            </button>
+            <RoleGuard user_type="candidate">
+                <button
+                    type="button"
+                    onclick={handleEdit}
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded-md transition-colors"
+                >
+                    <Edit3 class="h-3.5 w-3.5 mr-1" />
+                    Edit
+                </button>
+            </RoleGuard>
 
             <button
                 type="button"

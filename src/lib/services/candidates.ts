@@ -1,10 +1,10 @@
 import type { ListCandidate, CandidatePersonalInfo, WorkExperienceView, ListCandidateById, VerifyWorkExperienceResponse, UnVerifyWorkExperienceResponse, EducationView, VerifyEducationResponse, UnVerifyEducationResponse, CertificationView, UnVerifyCertificationResponse, PersonalGrowthView, UnVerifyPersonalGrowthResponse, WhoAmIView, SuccessStoryView, VerificationDetailResponse, GetCandidateWorkExperienceResponse, ListCandidateWorkExperienceProjectsResponse, ListAttachmentsResponse, UpdateWorkExperienceDescriptionResponse, UpdateWorkExperienceKeyAchievementsResponse, UpdateWorkExperienceProjectsResponse, UpdateWorkExperienceProjectsRequest } from '$lib/types/candidates';
-import { authService } from './auth';
+import { authStore } from './auth.svelte';
 import { goto } from '$app/navigation';
 
 export async function listCandidates(page_size: number, page: number): Promise<ListCandidate[]> {
     // Get authentication headers from the auth service
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
 
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates?page_size=${page_size}&page=${page}`,
@@ -17,7 +17,7 @@ export async function listCandidates(page_size: number, page: number): Promise<L
         // Handle specific error cases
         if (response.status === 401) {
             // If unauthorized, try refreshing the token once
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 // Retry the request with new token
                 return listCandidates(page_size, page);
@@ -38,7 +38,7 @@ export async function listCandidatesById(session_id: string | null): Promise<Lis
         throw new Error('Session ID is required');
     }
     // Get authentication headers from the auth service
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
 
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/by_id?session_id=${session_id}`,
@@ -51,7 +51,7 @@ export async function listCandidatesById(session_id: string | null): Promise<Lis
         // Handle specific error cases
         if (response.status === 401) {
             // If unauthorized, try refreshing the token once
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 // Retry the request with new token
                 return listCandidatesById(session_id);
@@ -68,7 +68,7 @@ export async function listCandidatesById(session_id: string | null): Promise<Lis
 
 export async function listCandidatesWithSimilaritySearch(page_size: number, page: number, search: string): Promise<ListCandidate[]> {
     // Get authentication headers from the auth service
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
 
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/similarity_search?page_size=${page_size}&page=${page}&search=${search}`,
@@ -80,7 +80,7 @@ export async function listCandidatesWithSimilaritySearch(page_size: number, page
         // Handle specific error cases
         if (response.status === 401) {
             // If unauthorized, try refreshing the token once
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 // Retry the request with new token
                 return listCandidates(page_size, page);
@@ -99,7 +99,7 @@ export async function listCandidatesWithSimilaritySearch(page_size: number, page
 
 export async function getCandidatePersonalInfo(candidateId: string): Promise<CandidatePersonalInfo> {
     // Get authentication headers from the auth service
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
 
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/personal_info`,
@@ -112,7 +112,7 @@ export async function getCandidatePersonalInfo(candidateId: string): Promise<Can
         // Handle specific error cases
         if (response.status === 401) {
             // If unauthorized, try refreshing the token once
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 // Retry the request with new token
                 return getCandidatePersonalInfo(candidateId);
@@ -131,7 +131,7 @@ export async function getCandidatePersonalInfo(candidateId: string): Promise<Can
 export async function listCandidateWorkExperience(
     candidateId: string,
 ): Promise<WorkExperienceView[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience`,
         { headers },
@@ -139,7 +139,7 @@ export async function listCandidateWorkExperience(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return listCandidateWorkExperience(candidateId); // Retry
             } else {
@@ -158,7 +158,7 @@ export async function listCandidateWorkExperience(
 export async function getCandidateEducation(
     candidateId: string,
 ): Promise<EducationView[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education`,
         { headers },
@@ -166,7 +166,7 @@ export async function getCandidateEducation(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidateEducation(candidateId); // Retry
             } else {
@@ -186,7 +186,7 @@ export async function getCandidateEducation(
 export async function getCandidateCertification(
     candidateId: string,
 ): Promise<CertificationView[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/certification`,
         { headers },
@@ -194,7 +194,7 @@ export async function getCandidateCertification(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidateCertification(candidateId); // Retry
             } else {
@@ -213,7 +213,7 @@ export async function getCandidateCertification(
 export async function getCandidatePersonalGrowth(
     candidateId: string,
 ): Promise<PersonalGrowthView[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/personal_growth`,
         { headers },
@@ -221,7 +221,7 @@ export async function getCandidatePersonalGrowth(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidatePersonalGrowth(candidateId); // Retry
             } else {
@@ -240,7 +240,7 @@ export async function getCandidatePersonalGrowth(
 export async function getCandidateSuccessStories(
     candidateId: string,
 ): Promise<SuccessStoryView[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_stories`,
         { headers },
@@ -248,7 +248,7 @@ export async function getCandidateSuccessStories(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidateSuccessStories(candidateId); // Retry
             } else {
@@ -268,7 +268,7 @@ export async function getCandidateSuccessStories(
 export async function getCandidateWhoAmI(
     candidateId: string,
 ): Promise<WhoAmIView> {
-const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/who_am_i`,
         { headers },
@@ -276,7 +276,7 @@ const headers = await authService.getAuthHeaders();
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidateWhoAmI(candidateId); // Retry
             } else {
@@ -299,7 +299,7 @@ export async function verifyWorkExperience(
     candidateId: string,
     workExperienceId: string,
 ): Promise<VerifyWorkExperienceResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verify`,
         {
@@ -310,7 +310,7 @@ export async function verifyWorkExperience(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifyWorkExperience(candidateId, workExperienceId); // Retry
             } else {
@@ -334,7 +334,7 @@ export async function unverifyWorkExperience(
     candidateId: string,
     workExperienceId: string,
 ): Promise<UnVerifyWorkExperienceResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/unverify`,
         {
@@ -345,7 +345,7 @@ export async function unverifyWorkExperience(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifyWorkExperience(candidateId, workExperienceId); // Retry
             } else {
@@ -370,7 +370,7 @@ export async function verifyEducation(
     candidateId: string,
     educationId: string,
 ): Promise<VerifyEducationResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education/${educationId}/verify`,
         {
@@ -381,7 +381,7 @@ export async function verifyEducation(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifyEducation(candidateId, educationId); // Retry
             } else {
@@ -404,7 +404,7 @@ export async function unverifyEducation(
     candidateId: string,
     educationId: string,
 ): Promise<UnVerifyEducationResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/education/${educationId}/verify`,
         {
@@ -415,7 +415,7 @@ export async function unverifyEducation(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return unverifyEducation(candidateId, educationId); // Retry
             } else {
@@ -439,7 +439,7 @@ export async function verifyCertification(
     candidateId: string,
     certificationId: string,
 ): Promise<UnVerifyCertificationResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/certification/${certificationId}/verify`,
         {
@@ -450,7 +450,7 @@ export async function verifyCertification(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifyCertification(candidateId, certificationId); // Retry
             } else {
@@ -473,7 +473,7 @@ export async function unverifyCertification(
     candidateId: string,
     certificationId: string,
 ): Promise<UnVerifyCertificationResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/certification/${certificationId}/unverify`,
         {
@@ -484,7 +484,7 @@ export async function unverifyCertification(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return unverifyCertification(candidateId, certificationId); // Retry
             } else {
@@ -507,7 +507,7 @@ export async function verifyPersonalGrowth(
     candidateId: string,
     personalGrowthId: string,
 ): Promise<VerifyWorkExperienceResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/personal_growth/${personalGrowthId}/verify`,
         {
@@ -518,7 +518,7 @@ export async function verifyPersonalGrowth(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifyPersonalGrowth(candidateId, personalGrowthId); // Retry
             } else {
@@ -540,7 +540,7 @@ export async function unverifyPersonalGrowth(
     candidateId: string,
     personalGrowthId: string,
 ): Promise<UnVerifyPersonalGrowthResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/personal_growth/${personalGrowthId}/unverify`,
         {
@@ -551,7 +551,7 @@ export async function unverifyPersonalGrowth(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return unverifyPersonalGrowth(candidateId, personalGrowthId); // Retry
             } else {
@@ -574,7 +574,7 @@ export async function verifySuccessStory(
     candidateId: string,
     successStoryId: string,
 ): Promise<VerifyWorkExperienceResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_story/${successStoryId}/verify`,
         {
@@ -585,7 +585,7 @@ export async function verifySuccessStory(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return verifySuccessStory(candidateId, successStoryId); // Retry
             } else {
@@ -607,7 +607,7 @@ export async function unverifySuccessStory(
     candidateId: string,
     successStoryId: string,
 ): Promise<UnVerifyPersonalGrowthResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/success_story/${successStoryId}/unverify`,
         {
@@ -618,7 +618,7 @@ export async function unverifySuccessStory(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return unverifySuccessStory(candidateId, successStoryId); // Retry
             } else {
@@ -643,7 +643,7 @@ export async function getWorkExperienceVerifications(
     candidateId: string,
     workExperienceId: string,
 ): Promise<VerificationDetailResponse[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/verifiers`,
         { headers },
@@ -651,7 +651,7 @@ export async function getWorkExperienceVerifications(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getWorkExperienceVerifications(candidateId, workExperienceId); // Retry
             } else {
@@ -671,7 +671,7 @@ export async function getCandidateWorkExperience(
     candidateId: string,
     workExperienceId: string,
 ): Promise<GetCandidateWorkExperienceResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}`,
         { headers },
@@ -679,9 +679,9 @@ export async function getCandidateWorkExperience(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
-                return getCandidateWorkExperience(candidateId,workExperienceId ); // Retry
+                return getCandidateWorkExperience(candidateId, workExperienceId); // Retry
             } else {
                 goto("/login"); // Redirect to login if refresh fails
                 throw new Error("Authentication expired. Please login again.");
@@ -702,7 +702,7 @@ export async function getCandidateWorkExperienceProjects(
     candidateId: string,
     workExperienceId: string,
 ): Promise<ListCandidateWorkExperienceProjectsResponse[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/projects`,
         { headers },
@@ -710,15 +710,15 @@ export async function getCandidateWorkExperienceProjects(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
-                return getCandidateWorkExperienceProjects(candidateId,workExperienceId );
+                return getCandidateWorkExperienceProjects(candidateId, workExperienceId);
             } else {
                 goto("/login");
                 throw new Error("Authentication expired. Please login again.");
             }
         }
-    
+
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to fetch candidate work experience");
     }
@@ -732,7 +732,7 @@ export async function getCandidateWorkExperienceAttachments(
     candidateId: string,
     workExperienceId: string,
 ): Promise<ListAttachmentsResponse[]> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/attachments`,
         { headers },
@@ -740,7 +740,7 @@ export async function getCandidateWorkExperienceAttachments(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return getCandidateWorkExperienceAttachments(candidateId, workExperienceId);
             } else {
@@ -748,7 +748,7 @@ export async function getCandidateWorkExperienceAttachments(
                 throw new Error("Authentication expired. Please login again.");
             }
         }
-    
+
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to fetch candidate work experience attachments");
     }
@@ -763,8 +763,8 @@ export async function updateWorkExperienceDescription(
     workExperienceId: string,
     description: string,
 ): Promise<UpdateWorkExperienceDescriptionResponse> {
-    const headers = await authService.getAuthHeaders();
-    
+    const headers = await authStore.getAuthHeaders();
+
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/description`,
         {
@@ -779,7 +779,7 @@ export async function updateWorkExperienceDescription(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return updateWorkExperienceDescription(candidateId, workExperienceId, description);
             } else {
@@ -787,7 +787,7 @@ export async function updateWorkExperienceDescription(
                 throw new Error("Authentication expired. Please login again.");
             }
         }
-    
+
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to update work experience description");
     }
@@ -802,8 +802,8 @@ export async function updateWorkExperienceKeyAchievements(
     workExperienceId: string,
     key_achievements: string[],
 ): Promise<UpdateWorkExperienceKeyAchievementsResponse> {
-    const headers = await authService.getAuthHeaders();
-    
+    const headers = await authStore.getAuthHeaders();
+
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/candidates/${candidateId}/work_experience/${workExperienceId}/key_achievements`,
         {
@@ -818,7 +818,7 @@ export async function updateWorkExperienceKeyAchievements(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return updateWorkExperienceKeyAchievements(candidateId, workExperienceId, key_achievements);
             } else {
@@ -826,7 +826,7 @@ export async function updateWorkExperienceKeyAchievements(
                 throw new Error("Authentication expired. Please login again.");
             }
         }
-    
+
         console.error(`API Error ${response.status}: ${await response.text()}`);
         throw new Error("Failed to update work experience description");
     }
@@ -841,7 +841,7 @@ export async function updateWorkExperienceProjects(
     workExperienceId: string,
     projects: UpdateWorkExperienceProjectsRequest[],
 ): Promise<UpdateWorkExperienceProjectsResponse> {
-    const headers = await authService.getAuthHeaders();
+    const headers = await authStore.getAuthHeaders();
 
     // If you want to send just a list (array) of projects, not wrapped in an object:
     const response = await fetch(
@@ -858,7 +858,7 @@ export async function updateWorkExperienceProjects(
 
     if (!response.ok) {
         if (response.status === 401) {
-            const refreshed = await authService.refreshToken();
+            const refreshed = await authStore.refreshToken();
             if (refreshed) {
                 return updateWorkExperienceProjects(candidateId, workExperienceId, projects);
             } else {
