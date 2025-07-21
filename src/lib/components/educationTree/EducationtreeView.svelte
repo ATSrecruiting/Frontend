@@ -243,7 +243,7 @@
                                                 class="flex items-center text-green-600 text-xs font-medium relative"
                                             >
                                                 <CheckCircle
-                                                    class="h-4 w-4 mr-1 flex-shrink-0"
+                                                    class="h-4 w-4 mr-1 shrink-0"
                                                 />
                                                 <span>Verified</span>
                                                 {#if count === 1}

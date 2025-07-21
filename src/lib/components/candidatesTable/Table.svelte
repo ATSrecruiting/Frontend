@@ -220,7 +220,7 @@
 
         <!-- Search bar -->
         <form onsubmit={handleSearch} class="flex flex-col sm:flex-row gap-2">
-            <div class="flex-grow relative">
+            <div class="grow relative">
                 <div
                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
                 >
@@ -402,7 +402,7 @@
                         >
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="shrink-0 h-10 w-10">
                                         {#if candidate.avatar}
                                             <img
                                                 class="h-10 w-10 rounded-full"

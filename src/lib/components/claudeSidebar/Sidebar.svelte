@@ -151,7 +151,7 @@
     <!-- Header/Logo Section -->
     <div class="p-4 border-b border-gray-700 flex items-center justify-between">
         <div class="flex items-center space-x-2 overflow-hidden">
-            <img src={logoSrc} alt={logoAlt} class="w-8 h-8 flex-shrink-0" />
+            <img src={logoSrc} alt={logoAlt} class="w-8 h-8 shrink-0" />
             {#if isExpanded}
                 <span
                     class="font-semibold whitespace-nowrap transition-opacity duration-300"
@@ -186,7 +186,7 @@
 
     <!-- Content/Navigation Section -->
     <div
-        class="flex-grow overflow-y-auto py-2 scrollbar-thin scrollbar-track-gray-900 scrollbar-thumb-gray-700"
+        class="grow overflow-y-auto py-2 scrollbar-thin scrollbar-track-gray-900 scrollbar-thumb-gray-700"
     >
         <nav>
             <ul>
@@ -213,7 +213,7 @@
                                     <span class="flex items-center min-w-0">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            class="h-5 w-5 flex-shrink-0"
+                                            class="h-5 w-5 shrink-0"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -289,7 +289,7 @@
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 flex-shrink-0"
+                                    class="h-5 w-5 shrink-0"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"

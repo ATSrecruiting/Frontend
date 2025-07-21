@@ -35,9 +35,10 @@ class AuthStore {
                 const data = await response.json();
                 this.setUser(data.user);
                 this.saveAccessToken(data.access_token);
-                if (data.user.account_type === "recruiter") {
+                console.log('Login successful:', data.user.user_type);
+                if (data.user.user_type === "recruiter") {
                     goto("/dashboard"); // Navigate both types to dashboard
-                } else if (data.user.account_type === "candidate") {
+                } else if (data.user.user_type === "candidate") {
                     goto(`/dashboard/candidates/${data.user.candidate_id}`); // Navigate both types to dashboard
                 }
             } else {

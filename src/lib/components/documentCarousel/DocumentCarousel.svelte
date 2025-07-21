@@ -133,7 +133,7 @@
             </button>
 
             <!-- Document viewer -->
-            <div class="flex-grow relative">
+            <div class="grow relative">
                 {#if getDocumentType(documents[currentIndex]) === "pdf"}
                     <iframe
                         src={`${documents[currentIndex].file_path}#toolbar=0`}

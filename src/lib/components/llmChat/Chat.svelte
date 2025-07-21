@@ -241,7 +241,7 @@
 <div class="h-full flex flex-col overflow-hidden bg-white text-black">
     {#if messages.length === 0}
         <!-- Empty state with centered input -->
-        <div class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="grow flex flex-col items-center justify-center p-4">
             <h1 class="text-2xl font-semibold text-black mb-6">
                 Chat about your candidates
             </h1>
@@ -433,7 +433,7 @@
         </div>
     {:else}
         <!-- Chat area when there are messages -->
-        <div class="flex-grow overflow-y-auto relative overflow-x-hidden">
+        <div class="grow overflow-y-auto relative overflow-x-hidden">
             <!-- Candidate panel toggle button (fixed position) -->
             <button
                 on:click={toggleCandidatePanel}
@@ -565,7 +565,7 @@
                                             )}
                                         class="mr-3 h-4 w-4 mt-1"
                                     />
-                                    <div class="flex-grow overflow-hidden">
+                                    <div class="grow overflow-hidden">
                                         <div
                                             class="flex items-center gap-2 mb-1"
                                         >

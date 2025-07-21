@@ -45,12 +45,12 @@
 </script>
 
 <div
-    class="min-h-screen bg-gradient-to-br from-background/50 to-background flex items-center justify-center p-4"
+    class="min-h-screen bg-linear-to-br from-background/50 to-background flex items-center justify-center p-4"
 >
     <div class="w-full max-w-md">
         <Card class="border-border/40 shadow-lg">
             <CardHeader
-                class="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground text-center space-y-2 pb-6"
+                class="bg-linear-to-r from-primary/90 to-primary text-primary-foreground text-center space-y-2 pb-6"
             >
                 <div class="flex justify-center mb-2">
                     <div
