@@ -4,6 +4,8 @@ import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import DataTableAvatar from "./data-table-avatar.svelte";
 import DataTableCheckbox from "./data-table-checkbox.svelte";
 import DataTableJobTitle from "./data-table-job-title.svelte";
+import DataTableActions from "./data-table-actions.svelte";
+
 
 
 
@@ -54,15 +56,30 @@ export const columns: ColumnDef<ListCandidate>[] = [
         },
         header: "Job Title",
     },
+        {
+        id: "years_of_experience",
+        cell : ({ row }) => {
+            return `${row.original.years_of_experience} years`;
+        },
+        header: "Experience",
+    },
     {
         accessorKey: "status",
         header: "Status",
 
     },
     {
-        accessorKey: "created_at",
+        id: "application_date",
+        accessorFn: (row) => new Date(row.created_at).toLocaleDateString(),
         header: "Application Date",
     },
+      {
+    id: "actions",
+    cell: ({ row }) => {
+      // You can pass whatever you need from `row.original` to the component
+      return renderComponent(DataTableActions, { id: row.original.id });
+    },
+  },
 
 
 ]
