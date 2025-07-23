@@ -7,6 +7,7 @@ import type { TempSession } from '$lib/types/chat';
 
 // Types for the request and SSE events
 export interface SendMessageRequest {
+    model: string | null; // Model name or ID, can be null if not selected
     session_id: string | null;
     message: string;
 

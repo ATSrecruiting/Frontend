@@ -1,16 +1,22 @@
 <script lang="ts">
-  import Sidebar from "$lib/components/claudeSidebar/Sidebar.svelte";
-  import Header from "$lib/components/claudeHeader/Header.svelte";
+  // import Sidebar from "$lib/components/claudeSidebar/Sidebar.svelte";
+  // import Header from "$lib/components/claudeHeader/Header.svelte";
   import { getLoggedUser } from "$lib/services/user";
   import type { UserProfile } from "$lib/types/user";
-  import {userStore} from "$lib/stores/userStore";
+  import { userStore } from "$lib/stores/userStore";
+
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import AppSidebar from "$lib/components/shadSidebar/app-sidebar.svelte";
+  import SiteHeader from "$lib/components/shadHeader/site-header.svelte";
+
+  let { children } = $props();
 
   let user = $state<UserProfile>();
 
   async function getUserprofile() {
     try {
       user = await getLoggedUser();
-      if (user){
+      if (user) {
         userStore.set(user);
       } else {
         console.error("User not found");
@@ -31,7 +37,20 @@
   });
 </script>
 
-<div class="flex h-screen bg-gray-50">
+<Sidebar.Provider
+  style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
+>
+  <AppSidebar variant="inset" />
+
+  <Sidebar.Inset>
+    <SiteHeader first_name={user?.first_name} last_name={user?.last_name} />
+    <main>
+      {@render children?.()}
+    </main>
+  </Sidebar.Inset>
+</Sidebar.Provider>
+
+<!-- <div class="flex h-screen bg-gray-50">
   <Sidebar
     logoSrc="https://apricot-tasha-63.tiiny.site/logoipsum-363-1.svg"
     logoAlt="Your Company"
@@ -43,4 +62,4 @@
       <slot />
     </main>
   </div>
-</div>
+</div> -->

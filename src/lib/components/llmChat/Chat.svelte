@@ -27,6 +27,7 @@
 
   // Reactive state
   let messages = $state<ChatMessage[]>([]);
+  let selectedModel = $state<string | null>(null);
   let input = $state("");
   let isLoading = $state(false);
   let messagesEnd = $state<HTMLElement | null>(null);
@@ -36,6 +37,10 @@
 
   // Candidates state
   let candidates = $state<Candidate[]>([]);
+
+  async function SetSelectedModel(modelName: string) {
+    selectedModel = modelName;
+  }
 
   // Load initial candidates (example IDs, replace with actual IDs)
   async function loadInitialCandidates() {
@@ -128,6 +133,7 @@
 
       // Call the SSE endpoint with our message and selected candidates
       const sseStream = sendMessageSSE({
+        model: selectedModel,
         message: userInput,
         session_id: session_id,
       });
@@ -231,7 +237,7 @@
 </script>
 
 <div class="h-full flex flex-col overflow-hidden bg-white text-black">
-  <Comobox></Comobox>
+  <Comobox setSelectedModel={SetSelectedModel} />
   {#if messages.length === 0}
     <!-- Empty state with centered input -->
     <div class="grow flex flex-col items-center justify-center p-4">

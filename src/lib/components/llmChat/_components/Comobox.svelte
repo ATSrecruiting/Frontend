@@ -1,42 +1,34 @@
 <script lang="ts">
   import CheckIcon from "@lucide/svelte/icons/check";
   import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
   import * as Command from "$lib/components/ui/command/index.js";
   import * as Popover from "$lib/components/ui/popover/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { cn } from "$lib/utils.js";
+  import { getOpenRouterModels } from "$lib/services/llmModels";
+  import type { ListOpenRouterModelsResponse } from "$lib/types/llm-models";
 
-  const frameworks = [
-    {
-      value: "sveltekit",
-      label: "ChatGPT 4.1",
-    },
-    {
-      value: "next.js",
-      label: "Claude Sonnet 4",
-    },
-    {
-      value: "nuxt.js",
-      label: "Gemini 2.5",
-    },
-    {
-      value: "remix",
-      label: "Remix",
-    },
-    {
-      value: "astro",
-      label: "Astro",
-    },
-  ];
+  async function LoadAllModels() {
+    const response = await getOpenRouterModels();
+    models = response;
+  }
+
+  onMount(() => {
+    LoadAllModels();
+  });
+
+  let { setSelectedModel } = $props<{
+    setSelectedModel: (modelName: string) => void;
+  }>();
+
+  let models = $state<ListOpenRouterModelsResponse[]>([]);
 
   let open = $state(false);
-  let value = $state("");
+  let id = $state<number>();
   let triggerRef = $state<HTMLButtonElement>(null!);
 
-  const selectedValue = $derived(
-    frameworks.find((f) => f.value === value)?.label
-  );
+  const selectedid = $derived(models.find((f) => f.id === id)?.name);
 
   // We want to refocus the trigger button when the user selects
   // an item from the list so users can continue navigating the
@@ -59,7 +51,7 @@
         role="combobox"
         aria-expanded={open}
       >
-        {selectedValue || "Select a Model"}
+        {selectedid || "Select a Model"}
         <ChevronsUpDownIcon class="opacity-50" />
       </Button>
     {/snippet}
@@ -69,19 +61,18 @@
       <Command.Input placeholder="Search framework..." />
       <Command.List>
         <Command.Empty>No framework found.</Command.Empty>
-        <Command.Group value="frameworks">
-          {#each frameworks as framework (framework.value)}
+        <Command.Group id="frameworks">
+          {#each models as model (model.id)}
             <Command.Item
-              value={framework.value}
+              id={model.id.toString()}
               onSelect={() => {
-                value = framework.value;
+                id = model.id;
+                setSelectedModel(model.model_name);
                 closeAndFocusTrigger();
               }}
             >
-              <CheckIcon
-                class={cn(value !== framework.value && "text-transparent")}
-              />
-              {framework.label}
+              <CheckIcon class={cn(id !== model.id && "text-transparent")} />
+              {model.name}
             </Command.Item>
           {/each}
         </Command.Group>
