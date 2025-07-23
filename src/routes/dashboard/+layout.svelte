@@ -55,7 +55,8 @@
     logoSrc="https://apricot-tasha-63.tiiny.site/logoipsum-363-1.svg"
     logoAlt="Your Company"
     footerText="© 2025 Your Company"
-  />
+  />\
+  
   <div class="flex-1 flex flex-col">
     <Header title="Dashboard" userProfile={user} />
     <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
