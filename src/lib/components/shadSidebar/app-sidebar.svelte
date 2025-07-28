@@ -47,7 +47,7 @@
           {#snippet child({ props }: { props: any })}
             <a href="##" {...props}>
               <BuildingIcon class="!size-5" />
-              <span class="text-base font-semibold">Acme Inc.</span>
+              <span class="text-base font-semibold">ATS Recruitment</span>
             </a>
           {/snippet}
         </Sidebar.MenuButton>

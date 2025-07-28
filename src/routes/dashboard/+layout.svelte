@@ -8,6 +8,7 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import AppSidebar from "$lib/components/shadSidebar/app-sidebar.svelte";
   import SiteHeader from "$lib/components/shadHeader/site-header.svelte";
+  import { ModeWatcher } from "mode-watcher";
 
   let { children } = $props();
 
@@ -38,13 +39,14 @@
 </script>
 
 <Sidebar.Provider
-  style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
+  style="--sidebar-width: calc(var(--spacing) * 70); --header-height: calc(var(--spacing) * 12);"
 >
   <AppSidebar variant="inset" />
 
   <Sidebar.Inset>
     <SiteHeader first_name={user?.first_name} last_name={user?.last_name} />
-    <main>
+    <ModeWatcher />
+    <main class="p-6">
       {@render children?.()}
     </main>
   </Sidebar.Inset>
