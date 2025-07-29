@@ -1,6 +1,6 @@
-export   interface Message {
-    id: string;
-    content: string;
-    sender: "user" | "assistant";
-    timestamp: Date;
-  }
+export interface Message {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp: Date;
+}

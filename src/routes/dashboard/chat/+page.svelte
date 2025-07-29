@@ -1,9 +1,5 @@
-<script>
-    import Chat from "$lib/components/llmChat/Chat.svelte";
-    
-
-    
-    
+<script lang="ts">
+    import ChatPage from "$lib/components/shadChat/ChatPage.svelte";
 </script>
 
-<Chat  />
+<ChatPage />

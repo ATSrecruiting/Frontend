@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { renderMessageContent } from "../llmChat/renderMessage.js";
   import type { Message } from "./types.js";
 
   let {
@@ -27,26 +28,30 @@
   -->
   <div class="flex flex-col gap-4 p-4 pb-40">
     {#each messages || [] as message (message.id)}
-      <div
-        class="flex {message.sender === 'user'
-          ? 'justify-end'
-          : 'justify-start'}"
-      >
+      {#if message.content && message.content.trim() !== ""}
         <div
-          class="flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-4 py-3 text-sm {message.sender ===
-          'user'
-            ? 'bg-primary text-primary-foreground ml-auto'
-            : 'bg-muted'}"
+          class="flex {message.role === 'user'
+            ? 'justify-end'
+            : 'justify-start'}"
         >
-          <div class="whitespace-pre-wrap">{message.content}</div>
-          <div class="text-xs opacity-70 mt-1">
-            {message.timestamp.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+          <div
+            class="flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-4 py-3 text-sm {message.role ===
+            'user'
+              ? 'bg-primary text-primary-foreground ml-auto'
+              : 'bg-muted'}"
+          >
+            <div class="whitespace-pre-wrap">
+              {@html renderMessageContent(message.content)}
+            </div>
+            <div class="text-xs opacity-70 mt-1">
+              {message.timestamp.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      {/if}
     {/each}
 
     {#if isLoading}

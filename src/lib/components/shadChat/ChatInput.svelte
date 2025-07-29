@@ -12,7 +12,6 @@
   let currentMessage = $state<string>("");
 
   function sendMessage() {
-    console.log("Sending message:", currentMessage);
     if (!currentMessage.trim() || isLoading) return;
 
     onsend?.(currentMessage.trim());
@@ -40,7 +39,7 @@
       <Textarea
         bind:value={currentMessage}
         placeholder="Type your message here."
-        class="pr-12 min-h-28"
+        class="pr-12 min-h-20"
         onkeydown={handleKeydown}
         disabled={isLoading}
       />
