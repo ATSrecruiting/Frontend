@@ -25,7 +25,7 @@
 
 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
     <div class="flex items-center flex-1 min-w-0">
-        <IconComponent class="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+        <IconComponent class="h-4 w-4 mr-2 text-gray-500 shrink-0" />
         <span class="text-sm text-gray-700 truncate">{doc.name}</span>
     </div>
     <button

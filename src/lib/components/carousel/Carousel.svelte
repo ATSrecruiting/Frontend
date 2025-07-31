@@ -127,14 +127,14 @@
 
         <!-- Loading state -->
         {#if isLoading}
-            <div class="flex-grow flex items-center justify-center">
+            <div class="grow flex items-center justify-center">
                 <div class="bg-white/80 p-6 rounded text-lg">
                     Loading files...
                 </div>
             </div>
             <!-- Error state -->
         {:else if error}
-            <div class="flex-grow flex items-center justify-center">
+            <div class="grow flex items-center justify-center">
                 <div class="bg-red-100 text-red-700 p-6 rounded">
                     <p>Error: {error}</p>
                     <button
@@ -147,12 +147,12 @@
             </div>
             <!-- No files state -->
         {:else if attachments.length === 0}
-            <div class="flex-grow flex items-center justify-center">
+            <div class="grow flex items-center justify-center">
                 <div class="bg-gray-100 p-6 rounded">No files to display</div>
             </div>
             <!-- Document viewer -->
         {:else if currentDoc}
-            <div class="flex-grow relative">
+            <div class="grow relative">
                 {#if getDocumentType(currentDoc.filename) === "pdf"}
                     <div class="w-full h-full">
                         <iframe

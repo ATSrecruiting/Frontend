@@ -30,7 +30,7 @@
 
 <div class="border border-green-200 bg-green-50 rounded-md p-4">
     <div class="flex items-start">
-        <CheckCircle class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
+        <CheckCircle class="h-5 w-5 text-green-500 mr-3 shrink-0 mt-0.5" />
         <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-green-800">
                 {verification.recruiter_name}

@@ -16,8 +16,8 @@
         CardHeader,
         CardTitle,
     } from "$lib/components/ui/card";
+    import { authStore } from "$lib/services/auth.svelte";
 
-    let isLoading = $state(false);
     let error_message = $state("");
     let rememberMe = $state(false);
 
@@ -26,47 +26,31 @@
 
     async function handleSubmit(event: SubmitEvent) {
         event.preventDefault();
-        isLoading = true;
         error_message = "";
 
+        const userData = {
+            email: email.trim(),
+            password: password.trim(),
+        };
+
         try {
-            const result = await loginUser({ email, password });
-
-            if (result.access_token) {
-                // Store tokens in localStorage
-                localStorage.setItem("access_token", result.access_token);
-
-                const expiryTime = new Date();
-                expiryTime.setHours(expiryTime.getHours() + 1); // Example: 1 hour expiry
-                localStorage.setItem("token_expiry", expiryTime.toISOString());
-
-                // Navigate based on account type
-                if (result.account_type === "recruiter" || result.account_type === "candidate") {
-                    goto("/dashboard"); // Navigate both types to dashboard
-                } else {
-                    goto("/dashboard"); // Default fallback navigation
-                }
-            } else {
-                error_message = "Login failed. Please check your credentials and try again.";
-            }
+            await authStore.login(userData);
         } catch (err) {
             error_message =
                 err instanceof Error
                     ? err.message
                     : "An unexpected error occurred during login.";
-        } finally {
-            isLoading = false;
         }
     }
 </script>
 
 <div
-    class="min-h-screen bg-gradient-to-br from-background/50 to-background flex items-center justify-center p-4"
+    class="min-h-screen bg-linear-to-br from-background/50 to-background flex items-center justify-center p-4"
 >
     <div class="w-full max-w-md">
         <Card class="border-border/40 shadow-lg">
             <CardHeader
-                class="bg-gradient-to-r from-primary/90 to-primary text-primary-foreground text-center space-y-2 pb-6"
+                class="bg-linear-to-r from-primary/90 to-primary text-primary-foreground text-center space-y-2 pb-6"
             >
                 <div class="flex justify-center mb-2">
                     <div
@@ -98,7 +82,7 @@
                 <form
                     onsubmit={(e) => {
                         e.preventDefault(); // Keep default prevention
-                        handleSubmit(e);    // Call the async handler
+                        handleSubmit(e); // Call the async handler
                     }}
                     class="space-y-4"
                 >
@@ -174,22 +158,24 @@
                         <Checkbox id="remember-me" bind:checked={rememberMe} />
                         <Label
                             for="remember-me"
-                            class="text-sm text-muted-foreground select-none"  
-                            >Remember me</Label 
-                        > 
+                            class="text-sm text-muted-foreground select-none"
+                            >Remember me</Label
+                        >
                     </div>
 
                     {#if error_message}
-                        <p class="text-sm text-destructive text-center">{error_message}</p>
+                        <p class="text-sm text-destructive text-center">
+                            {error_message}
+                        </p>
                     {/if}
 
                     <Button
                         type="submit"
                         class="w-full"
                         variant="default"
-                        disabled={isLoading}
+                        disabled={authStore.loading}
                     >
-                        {#if isLoading}
+                        {#if authStore.loading}
                             <svg
                                 class="animate-spin -ml-1 mr-2 h-4 w-4"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -216,10 +202,9 @@
                         {/if}
                     </Button>
                 </form>
+            </CardContent>
 
-                </CardContent>
-
-            <CardFooter class="bg-muted/50 flex justify-center py-4 mt-6"> 
+            <CardFooter class="bg-muted/50 flex justify-center py-4 mt-6">
                 <p class="text-sm text-muted-foreground">
                     Don't have an account?
                     <a
@@ -232,7 +217,7 @@
         </Card>
 
         <p class="mt-4 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Your Company. All rights reserved. 
+            © {new Date().getFullYear()} Your Company. All rights reserved.
         </p>
     </div>
 </div>

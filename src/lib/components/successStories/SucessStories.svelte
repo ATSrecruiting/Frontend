@@ -251,7 +251,7 @@
                       type="text"
                       bind:value={newSkill}
                       placeholder="Add a skill"
-                      class="flex-grow rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
+                      class="grow rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                     />
                     <button
                       type="button"
@@ -468,7 +468,7 @@
                     type="text"
                     bind:value={newSkill}
                     placeholder="e.g., Leadership, Problem-Solving"
-                    class="flex-grow rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
+                    class="grow rounded-l-md border border-gray-300 px-3 py-2 focus:border-black focus:ring-1 focus:ring-black"
                   />
                   <button
                     type="button"

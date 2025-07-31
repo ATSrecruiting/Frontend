@@ -329,7 +329,7 @@
                                 {#each experience.key_achievements as achievement}
                                     <li class="flex items-start">
                                         <div
-                                            class="flex-shrink-0 w-1.5 h-1.5 bg-black rounded-full mt-2.5 mr-3"
+                                            class="shrink-0 w-1.5 h-1.5 bg-black rounded-full mt-2.5 mr-3"
                                         ></div>
                                         <span class="text-gray-700"
                                             >{achievement}</span
@@ -463,7 +463,7 @@
                                             class="flex items-center flex-1 min-w-0"
                                         >
                                             <IconComponent
-                                                class="h-4 w-4 mr-2 text-gray-500 flex-shrink-0"
+                                                class="h-4 w-4 mr-2 text-gray-500 shrink-0"
                                             />
                                             <span
                                                 class="text-sm text-gray-700 truncate"
@@ -524,7 +524,7 @@
                                         >
                                             <div class="flex items-start">
                                                 <CheckCircle
-                                                    class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5"
+                                                    class="h-5 w-5 text-green-500 mr-3 shrink-0 mt-0.5"
                                                 />
                                                 <div class="flex-1 min-w-0">
                                                     <p

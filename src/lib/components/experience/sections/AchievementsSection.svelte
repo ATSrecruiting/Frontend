@@ -18,7 +18,7 @@
         {#each achievements as achievement}
             <li class="flex items-start">
                 <div
-                    class="flex-shrink-0 w-1.5 h-1.5 bg-black rounded-full mt-2.5 mr-3"
+                    class="shrink-0 w-1.5 h-1.5 bg-black rounded-full mt-2.5 mr-3"
                 ></div>
                 <span class="text-gray-700">{achievement}</span>
             </li>
