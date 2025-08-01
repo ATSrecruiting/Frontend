@@ -4,6 +4,7 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import { MoonIcon, SunIcon } from "lucide-svelte";
   import { toggleMode } from "mode-watcher";
+  import DropDownMenu from "./_components/drop-down-menu.svelte";
   let { first_name, last_name } = $props<{
     first_name: string | undefined;
     last_name: string | undefined;
@@ -30,16 +31,7 @@
         />
         <span class="sr-only">Toggle theme</span>
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        class="dark:text-foreground hidden sm:flex"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {first_name}
-        {last_name}
-      </Button>
+      <DropDownMenu {first_name} {last_name}></DropDownMenu>
     </div>
   </div>
 </header>

@@ -173,10 +173,10 @@
         aria-expanded={isExpanded}
     >
         <div
-            class="w-full flex items-center justify-between border-b-2 border-black pb-2 transition-all duration-200"
+            class="w-full flex items-center justify-between border-b-2 border-foreground pb-2 transition-all duration-200"
         >
             <div class="flex items-center">
-                <h2 class="text-xl font-bold text-black mr-2">
+                <h2 class="text-xl font-bold text-foreground mr-2">
                     Personal Growth
                 </h2>
             </div>
@@ -185,7 +185,7 @@
                     ? 'rotate-180'
                     : ''}"
             >
-                <ChevronDown class="h-5 w-5 text-black" />
+                <ChevronDown class="h-5 w-5 text-foreground" />
             </div>
         </div>
     </button>
@@ -194,39 +194,45 @@
         <div class="flow-root">
             {#if isLoading}
                 <div
-                    class="flex justify-center items-center py-10 text-gray-500"
+                    class="flex justify-center items-center py-10 text-muted-foreground"
                 >
                     <Loader class="h-6 w-6 mr-2 animate-spin" /> Loading Personal
                     Growth...
                 </div>
             {:else if fetchError}
                 <div
-                    class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+                    class="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm"
                 >
                     Error loading data: {fetchError}
                 </div>
             {:else if personalGrowth && personalGrowth.length > 0}
-                <ul class="divide-y divide-gray-100">
+                <ul class="divide-y divide-border">
                     {#each personalGrowth as pg (pg.id)}
                         {@const userVerified = isVerifiedByCurrentUser(pg)}
                         <li
-                            class="relative border-l-2 border-gray-200 py-4 pl-6 hover:border-black transition-colors duration-200"
+                            class="relative border-l-2 border-border py-4 pl-6 hover:border-foreground transition-colors duration-200"
                         >
-                            <!-- Black dot -->
+                            <!-- Dot -->
                             <span
-                                class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-black"
+                                class="absolute -left-1.5 top-6 h-3 w-3 rounded-full bg-foreground"
                             ></span>
 
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-lg font-semibold">
+                                        <p
+                                            class="text-lg font-semibold text-foreground"
+                                        >
                                             {pg.area_of_focus}
                                         </p>
-                                        <p class="text-base font-medium">
+                                        <p
+                                            class="text-base font-medium text-foreground"
+                                        >
                                             {pg.activity_method}
                                         </p>
-                                        <p class="text-sm text-gray-600">
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
                                             {pg.timeframe}
                                         </p>
                                     </div>
@@ -237,7 +243,7 @@
                                             {@const count =
                                                 pg.verifications.length}
                                             <div
-                                                class="flex items-center text-green-600 text-xs font-medium relative"
+                                                class="flex items-center text-green-600 dark:text-green-400 text-xs font-medium relative"
                                             >
                                                 <CheckCircle
                                                     class="h-4 w-4 mr-1 shrink-0"
@@ -245,7 +251,7 @@
                                                 <span>Verified</span>
                                                 {#if count === 1}
                                                     <span
-                                                        class="text-gray-500 ml-1"
+                                                        class="text-muted-foreground ml-1"
                                                     >
                                                         by {pg.verifications[0]
                                                             .recruiter_name ??
@@ -254,7 +260,7 @@
                                                 {:else if count > 1}
                                                     <button
                                                         type="button"
-                                                        class="flex items-center text-gray-500 ml-1 hover:text-black transition-colors"
+                                                        class="flex items-center text-muted-foreground ml-1 hover:text-foreground transition-colors"
                                                         onclick={() =>
                                                             toggleVerifiers(
                                                                 pg.id,
@@ -268,10 +274,10 @@
                                                     </button>
                                                     {#if visibleVerifiers[pg.id]}
                                                         <div
-                                                            class="absolute top-full right-0 mt-1 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-2 text-xs"
+                                                            class="absolute top-full right-0 mt-1 w-60 bg-popover border border-border rounded-md shadow-lg z-10 p-2 text-xs"
                                                         >
                                                             <p
-                                                                class="font-semibold mb-1 border-b pb-1"
+                                                                class="font-semibold mb-1 border-b border-border pb-1 text-popover-foreground"
                                                             >
                                                                 Verified By:
                                                             </p>
@@ -281,13 +287,13 @@
                                                                 {#each pg.verifications as verification}
                                                                     <li>
                                                                         <span
-                                                                            class="font-medium"
+                                                                            class="font-medium text-popover-foreground"
                                                                         >
                                                                             {verification.recruiter_name ??
                                                                                 "Unknown"}
                                                                         </span>
                                                                         <span
-                                                                            class="text-gray-500 block text-[11px]"
+                                                                            class="text-muted-foreground block text-[11px]"
                                                                         >
                                                                             {formatVerificationDate(
                                                                                 verification.verified_at,
@@ -302,9 +308,9 @@
                                             </div>
                                         {:else}
                                             <div
-                                                class="flex items-center text-gray-500 text-xs font-medium"
+                                                class="flex items-center text-muted-foreground text-xs font-medium"
                                             >
-                                                <span class="text-red-500"
+                                                <span class="text-destructive"
                                                     >Not verified</span
                                                 >
                                             </div>
@@ -314,7 +320,7 @@
                                         {#if userVerified}
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center text-xs font-medium text-red-600 hover:text-red-800 transition-colors mt-1"
+                                                class="inline-flex items-center text-xs font-medium text-destructive hover:text-destructive/80 transition-colors mt-1"
                                                 onclick={() =>
                                                     openVerificationModal(
                                                         pg,
@@ -328,7 +334,7 @@
                                         {:else}
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center text-xs font-medium text-gray-600 hover:text-black transition-colors mt-1"
+                                                class="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mt-1"
                                                 onclick={() =>
                                                     openVerificationModal(
                                                         pg,
@@ -343,7 +349,7 @@
                                     </div>
                                 </div>
 
-                                <p class="text-base text-gray-700 mt-1">
+                                <p class="text-base text-muted-foreground mt-1">
                                     {pg.description}
                                 </p>
 
@@ -352,7 +358,7 @@
                                     <div class="flex flex-wrap gap-1 mt-2">
                                         {#each pg.skills_gained as skill}
                                             <span
-                                                class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+                                                class="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
                                             >
                                                 {skill}
                                             </span>
@@ -363,7 +369,7 @@
                                 {#if pg.attachments && pg.attachments.length > 0}
                                     <button
                                         type="button"
-                                        class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                                        class="mt-2 inline-flex items-center px-3 py-1.5 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors text-sm"
                                         onclick={() =>
                                             openDocumentCarousel(pg.id)}
                                     >
@@ -376,7 +382,7 @@
                     {/each}
                 </ul>
             {:else}
-                <div class="text-center py-6 text-gray-500">
+                <div class="text-center py-6 text-muted-foreground">
                     No personal growth entries added for this candidate yet.
                 </div>
             {/if}
@@ -396,33 +402,33 @@
         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
     >
         <div
-            class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden"
+            class="bg-popover rounded-lg shadow-xl w-full max-w-md overflow-hidden"
         >
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 class="text-lg font-medium text-gray-900">
+            <div class="px-6 py-4 bg-muted border-b border-border">
+                <h3 class="text-lg font-medium text-popover-foreground">
                     {isUnverifying ? "Unverify" : "Verify"} Personal Growth
                 </h3>
             </div>
             <div class="p-6">
                 <div class="mb-4">
-                    <p class="font-semibold text-gray-800">
+                    <p class="font-semibold text-popover-foreground">
                         {persGrowthToVerify.area_of_focus}
                     </p>
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-muted-foreground">
                         {persGrowthToVerify.activity_method}
                     </p>
                 </div>
 
                 {#if verificationError}
                     <div
-                        class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+                        class="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm"
                     >
                         {verificationError}
                     </div>
                 {/if}
 
                 <div class="flex justify-between items-center mt-6">
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-muted-foreground">
                         <p>
                             {#if isUnverifying}
                                 Your verification will be removed.
@@ -434,7 +440,7 @@
                     <div class="flex gap-2">
                         <button
                             type="button"
-                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                            class="px-4 py-2 border border-border rounded-md text-sm font-medium text-popover-foreground bg-popover hover:bg-muted disabled:opacity-50"
                             onclick={closeVerificationModal}
                             disabled={verificationLoading}
                         >
@@ -442,11 +448,11 @@
                         </button>
                         <button
                             type="button"
-                            class={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                            class={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground ${
                                 isUnverifying
-                                    ? "bg-red-600 hover:bg-red-700"
-                                    : "bg-black hover:bg-gray-800"
-                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center disabled:opacity-75`}
+                                    ? "bg-destructive hover:bg-destructive/90"
+                                    : "bg-primary hover:bg-primary/90"
+                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring flex items-center disabled:opacity-75`}
                             onclick={handleVerifyPersonalGrowth}
                             disabled={verificationLoading}
                         >
