@@ -4,9 +4,9 @@
   import { authStore } from "$lib/services/auth.svelte";
   import { goto } from "$app/navigation";
 
-  async function handleLogout() {
+  function handleLogout() {
     try {
-      await authStore.logout();
+      authStore.logout();
     } catch (error) {
       console.error("Logout failed:", error);
       // Handle logout error if necessary
