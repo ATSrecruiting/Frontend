@@ -1,4 +1,5 @@
 // src/hooks.server.ts
+import { goto } from '$app/navigation';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -11,6 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         console.log('Hook: Set locals.user to:', event.locals.user);
     } else {
         event.locals.user = null;
+        goto('/login'); // Redirect to login page if no refresh token
         console.log('Hook: Set locals.user to null');
     }
 
