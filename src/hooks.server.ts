@@ -12,7 +12,6 @@ export const handle: Handle = async ({ event, resolve }) => {
         console.log('Hook: Set locals.user to:', event.locals.user);
     } else {
         event.locals.user = null;
-        goto('/login'); // Redirect to login page if no refresh token
         console.log('Hook: Set locals.user to null');
     }
 
