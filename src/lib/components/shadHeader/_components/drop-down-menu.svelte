@@ -7,7 +7,6 @@
   async function handleLogout() {
     try {
       await authStore.logout();
-      goto("/login");
     } catch (error) {
       console.error("Logout failed:", error);
       // Handle logout error if necessary

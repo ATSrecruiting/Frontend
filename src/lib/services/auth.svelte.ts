@@ -69,6 +69,7 @@ class AuthStore {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token_expiry');
+        goto('/login'); // Redirect to login page
     }
 
     setUser(user: UserProfile | null) {
