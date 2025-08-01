@@ -65,7 +65,7 @@ class AuthStore {
 
 
 
-    async logout() {
+    logout() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token_expiry');
